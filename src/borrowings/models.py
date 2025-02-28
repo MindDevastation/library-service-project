@@ -2,6 +2,7 @@ import datetime
 
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 
 
 class Borrowing(models.Model):
@@ -29,7 +30,7 @@ class Borrowing(models.Model):
 
     def clean(self):
         if self.expected_return_date < self.borrow_date:
-            raise ValueError("Expected return date cannot be before borrow date")
+            raise ValidationError("Expected return date cannot be before borrow date")
 
     def save(self, *args, **kwargs):
         self.full_clean()
