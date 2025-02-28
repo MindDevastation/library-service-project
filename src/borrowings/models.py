@@ -27,7 +27,12 @@ class Borrowing(models.Model):
             models.Index(fields=["borrow_date", "expected_return_date", "status"])
         ]
 
+    def clean(self):
+        if self.expected_return_date < self.borrow_date:
+            raise ValueError("Expected return date cannot be before borrow date")
+
     def save(self, *args, **kwargs):
+        self.full_clean()
         if self.status == self.Status.RETURNED and not self.actual_return_date:
             self.actual_return_date = datetime.date.today()
         super().save(*args, **kwargs)
