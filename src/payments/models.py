@@ -19,7 +19,6 @@ class Payment(models.Model):
         FINE = "FINE", "Penalty"
 
     class Currency(models.TextChoices):
-        UAH = "UAH", "Ukrainian hryvnia"
         USD = "USD", "US Dollar"
         EUR = "EUR", "Euro"
 
