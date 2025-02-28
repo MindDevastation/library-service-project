@@ -13,9 +13,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
-
 import os
-
+import django
 load_dotenv()  # take environment variables from .env.
 
 log_dir = "logs"
@@ -33,6 +32,9 @@ SECRET_KEY = "django-insecure-job=!mu53051-giox5!rrxr!q(27n2ift-)f$pbis)@^1k&59#
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'src.library.settings')
+django.setup()
 
 ALLOWED_HOSTS = []
 
