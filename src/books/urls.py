@@ -14,7 +14,7 @@ urlpatterns = [
         "authors/<int:pk>/",
         AuthorDetailView.as_view(),
         name="author-detail"),
-    path("bookslist/", BookListCreateView.as_view(), name="book-list-create"),
+    path("booklist/", BookListCreateView.as_view(), name="book-list-create"),
     path("booklist/<int:pk>/", BookDetailView.as_view(), name="book-detail"),
 ]
 
