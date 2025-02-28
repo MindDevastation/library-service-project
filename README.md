@@ -14,7 +14,7 @@ Change folder to src:
 Run:
 
 ````bash
-  pip install -r requrements.txt
+  pip install -r requirements.txt
 ````
 
 ## Add auto code styling
