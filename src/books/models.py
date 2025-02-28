@@ -28,7 +28,9 @@ class Book(models.Model):
 
     @property
     def quantity(self):
-        borrowed_count = self.borrowings.filter(actual_return_date__isnull=True).count()
+        borrowed_count = self.borrowings.filter(
+            actual_return_date__isnull=True
+        ).count()
         return self.inventory - borrowed_count
 
     class Meta:
