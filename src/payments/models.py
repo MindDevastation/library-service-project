@@ -34,7 +34,7 @@ class Payment(models.Model):
     money_to_pay = models.DecimalField(max_digits=5, decimal_places=2, positive=True)
     borrow_date = models.DateField()
     currency = models.CharField(
-        max_length=3, choices=Currency.choices, default=Currency.UAH, blank=True
+        max_length=3, choices=Currency.choices, default=Currency.USD, blank=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
