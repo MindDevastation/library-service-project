@@ -16,7 +16,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
@@ -30,4 +30,8 @@ urlpatterns = [
         "swagger/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"
     ),
     path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    path("api/users/", include("users.urls"), name="api-users"),
+    path("api/books/", include("books.urls", namespace="books")),
+    path("api/payments/", include("payments.urls", namespace="payments")),
+    path("api/borrowings/", include("borrowings.urls", namespace="borrowings")),
 ]

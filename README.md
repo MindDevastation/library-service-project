@@ -14,7 +14,7 @@ Change folder to src:
 Run:
 
 ````bash
-  pip install -r requrements.txt
+  pip install -r requirements.txt
 ````
 
 ## Add auto code styling
@@ -24,6 +24,11 @@ Run:
 ```bash
   pre-commit install
 ```
+
+Run:
+````bash
+   pip install djangorestframework-simplejwt
+````
 
 It will run `black` every time you make a commit
 

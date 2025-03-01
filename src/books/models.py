@@ -12,13 +12,12 @@ class Author(models.Model):
         verbose_name = "Author"
         verbose_name_plural = "Authors"
 
-
-class CoverType(models.TextChoices):
-    HARD = "HARD", "Hardcover"
-    SOFT = "SOFT", "Softcover"
-
-
+        
 class Book(models.Model):
+    class CoverType(models.TextChoices):
+        HARD = "HARD", "Hardcover"
+        SOFT = "SOFT", "Softcover"
+    
     title = models.CharField(max_length=255)
     pages = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     authors = models.ManyToManyField(Author, related_name="books")
