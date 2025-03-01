@@ -1,3 +1,4 @@
+from decimal import Decimal
 from uuid import uuid4
 
 import paypalrestsdk
@@ -40,7 +41,7 @@ class Payment(models.Model):
         Borrowing, on_delete=models.CASCADE, related_name="%(class)s_payments"
     )
     amount = models.DecimalField(
-        max_digits=5, decimal_places=2, validators=[MinValueValidator(0.01)]
+        max_digits=5, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))]
     )
     borrow_date = models.DateField()
     payment_id = models.UUIDField(default=uuid4, editable=False, unique=True)
@@ -103,31 +104,32 @@ class PayPalPayment(Payment):
                 }
             )
 
-            order = paypalrestsdk.Order(
-                {
-                    "intent": "CAPTURE",
-                    "purchase_units": [
-                        {
-                            "amount": {
-                                "currency_code": self.currency,
-                                "value": str(self.amount),
-                            },
-                            "description": f"Payment for borrowing id {self.borrowing.id}",
-                        }
-                    ],
-                    "application_context": {
-                        "return_url": f"{base_url}success/",
-                        "cancel_url": f"{base_url}cancel/",
-                    },
-                }
-            )
+            order_data = {
+                "intent": "CAPTURE",
+                "purchase_units": [
+                    {
+                        "amount": {
+                            "currency_code": self.currency,
+                            "value": str(self.amount),
+                        },
+                        "description": f"Payment for borrowing id {self.borrowing.id}",
+                    }
+                ],
+                "application_context": {
+                    "return_url": f"{base_url}success/",
+                    "cancel_url": f"{base_url}cancel/",
+                },
+            }
 
-            if order.create():
-                self.paypal_order_id = order.id
+            order = paypalrestsdk.Order()
+            response = order.post('v1/checkout/orders', order_data)
+
+            if response:
+                self.paypal_order_id = response['id']
                 self.save()
-                for link in order.links:
-                    if link.rel == "approve":
-                        return link.href
+                for link in response['links']:
+                    if link['rel'] == "approve":
+                        return link['href']
             else:
                 raise ValueError(f"PayPal order creation failed: {order.error}")
         except ResourceNotFound as e:

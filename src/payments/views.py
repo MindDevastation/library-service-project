@@ -60,21 +60,18 @@ class CreatePayPalPaymentView(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            payment, approval_url = serializer.save()
-            return Response(
-                {
-                    "message": "Payment created successfully!",
-                    "payment_id": payment.payment_id,
-                    "paypal_order_id": payment.paypal_order_id,
-                    "approval_url": approval_url,
-                    "amount": payment.amount,
-                    "currency": payment.currency,
-                },
-                status=status.HTTP_201_CREATED,
-            )
-        return Response(
-            {"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST
-        )
+            payment = serializer.save()
+            approval_url = payment.create_order()
+            return Response({
+                "message": "Payment created successfully!",
+                "payment_id": payment.payment_id,
+                "paypal_order_id": payment.paypal_order_id,
+                "approval_url": approval_url,
+                "amount": payment.amount,
+                "currency": payment.currency,
+            }, status=status.HTTP_201_CREATED)
+
+        return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PayPalPaymentSuccessView(APIView):
