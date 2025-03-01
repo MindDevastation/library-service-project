@@ -43,7 +43,7 @@ class StripePaymentViewSet(
             "message": "Payment created successfully!",
             "payment_id": payment.id,
             "payment_intent_id": payment.payment_intent_id,
-            "amount": payment.money_to_pay,
+            "amount": payment.amount,
             "currency": payment.currency,
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
