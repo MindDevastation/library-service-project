@@ -7,6 +7,11 @@ from rest_framework import serializers
 from books.models import Book
 from books.serializers import AuthorSerializer, BookSerializer
 from borrowings.models import Borrowing
+from borrowings.validators import (
+    BookAvailabilityValidator,
+    BorrowingUniqueValidator,
+    ExpectedReturnDateValidator,
+)
 
 
 class BorrowingListSerializer(serializers.ModelSerializer):
@@ -58,32 +63,20 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
         ]
 
     def validate_book(self, book):
-        if book.quantity <= 0:
-            raise serializers.ValidationError("Book is out of stock")
+        validator = BookAvailabilityValidator()
+        validator(book)
         return book
 
     def validate_expected_return_date(self, expected_return_date):
-        if expected_return_date <= date.today():
-            raise serializers.ValidationError(
-                "Expected return date cannot be before borrow date"
-            )
-        if expected_return_date > date.today() + datetime.timedelta(days=30):
-            raise serializers.ValidationError(
-                "Expected return date cannot be more than 30 days in the future"
-            )
+        validator = ExpectedReturnDateValidator()
+        validator(expected_return_date)
         return expected_return_date
 
     def validate(self, data):
-        book = data.get("book")
         user = self.context["request"].user
-        if Borrowing.objects.filter(
-            book=book,
-            user=user,
-            status__in=[Borrowing.Status.PENDING, Borrowing.Status.OVERDUE],
-        ).exists():
-            raise serializers.ValidationError(
-                "You already has an active borrowing for this book"
-            )
+        book = data.get("book")
+        validator = BorrowingUniqueValidator(user=user)
+        validator(book)
         return data
 
     def create(self, validated_data):
