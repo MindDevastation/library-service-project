@@ -4,6 +4,8 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 
+from borrowings.validators import ExpectedReturnDateValidator
+
 
 class Borrowing(models.Model):
 
@@ -13,7 +15,9 @@ class Borrowing(models.Model):
         OVERDUE = "overdue", "Overdue"
 
     borrow_date = models.DateField(auto_now_add=True)
-    expected_return_date = models.DateField()
+    expected_return_date = models.DateField(
+        validators=[ExpectedReturnDateValidator(error_class=ValidationError)]
+    )
     actual_return_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=8, choices=Status.choices)
     book = models.ForeignKey(
@@ -27,11 +31,6 @@ class Borrowing(models.Model):
         indexes = [
             models.Index(fields=["borrow_date", "expected_return_date", "status"])
         ]
-
-    def clean(self):
-        borrow_date = self.borrow_date or datetime.date.today()
-        if self.expected_return_date < borrow_date:
-            raise ValidationError("Expected return date cannot be before borrow date")
 
     def save(self, *args, **kwargs):
         self.full_clean()
