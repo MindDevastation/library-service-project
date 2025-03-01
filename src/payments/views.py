@@ -18,9 +18,13 @@ class PaymentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         stripe_payments = StripePayment.objects.all()
         stripe_serializer = StripePaymentSerializer(stripe_payments, many=True)
 
+        paypal_payments = PayPalPayment.objects.all()
+        paypal_serializer = PayPalPaymentSerializer(paypal_payments, many=True)
+
         return Response(
             {
                 "stripe_payments": stripe_serializer.data,
+                "paypal_payments": paypal_serializer.data,
             },
             status=status.HTTP_200_OK,
         )
