@@ -23,15 +23,3 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
-
-
-class BookViewSet(viewsets.ModelViewSet):
-
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    authentication_classes = [JWTAuthentication]
-
-    def get_permissions(self):
-        if self.action in ["list", "retrieve"]:
-            return [AllowAny()]
-        return [IsAdminUser()]
