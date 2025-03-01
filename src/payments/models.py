@@ -2,6 +2,7 @@ from uuid import uuid4
 
 import stripe
 from django.conf import settings
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from borrowings.models import Borrowing
@@ -31,7 +32,9 @@ class Payment(models.Model):
     borrowing = models.ForeignKey(
         Borrowing, on_delete=models.CASCADE, related_name="payments"
     )
-    amount = models.DecimalField(max_digits=5, decimal_places=2, positive=True)
+    amount = models.DecimalField(
+        max_digits=5, decimal_places=2, validators=[MinValueValidator(0.01)]
+    )
     borrow_date = models.DateField()
     payment_id = models.UUIDField(default=uuid4, editable=False, unique=True)
     currency = models.CharField(
