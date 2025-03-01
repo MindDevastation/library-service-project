@@ -15,7 +15,7 @@ class Borrowing(models.Model):
     borrow_date = models.DateField(auto_now_add=True)
     expected_return_date = models.DateField()
     actual_return_date = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=8, choices=Status)
+    status = models.CharField(max_length=8, choices=Status.choices)
     book = models.ForeignKey(
         "books.Book", on_delete=models.CASCADE, related_name="borrowings"
     )
@@ -29,7 +29,8 @@ class Borrowing(models.Model):
         ]
 
     def clean(self):
-        if self.expected_return_date < self.borrow_date:
+        borrow_date = self.borrow_date or datetime.date.today()
+        if self.expected_return_date < borrow_date:
             raise ValidationError("Expected return date cannot be before borrow date")
 
     def save(self, *args, **kwargs):
