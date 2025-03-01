@@ -29,4 +29,4 @@ class StripePaymentSerializer(serializers.ModelSerializer):
 class StripePaymentStatusUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = StripePayment
-        fields = ("status", )
+        fields = ("status",)

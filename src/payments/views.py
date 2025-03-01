@@ -2,7 +2,10 @@ from rest_framework import viewsets, status, mixins
 from rest_framework.response import Response
 
 from payments.models import StripePayment
-from payments.serializers import StripePaymentSerializer, StripePaymentStatusUpdateSerializer
+from payments.serializers import (
+    StripePaymentSerializer,
+    StripePaymentStatusUpdateSerializer,
+)
 
 
 class PaymentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -23,7 +26,7 @@ class StripePaymentViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin
+    mixins.UpdateModelMixin,
 ):
     queryset = StripePayment.objects.all()
 
