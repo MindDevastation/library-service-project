@@ -1,11 +1,12 @@
 from rest_framework import generics, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .models import User, Book
-from .serializers import (
+from users.models import User
+from books.models import Book
+from books.serializers import BookSerializer
+from users.serializers import (
     UserRegistrationSerializer,
     UserProfileSerializer,
-    BookSerializer,
 )
 
 
