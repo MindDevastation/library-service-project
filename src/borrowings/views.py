@@ -8,8 +8,10 @@ from borrowings.serializers import BorrowingDetailSerializer, BorrowingListSeria
 class BorrowingViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
-    queryset = Borrowing.objects.all()
     serializer_class = BorrowingListSerializer
+    queryset = Borrowing.objects.select_related("user", "book").prefetch_related(
+        "book__authors"
+    )
 
     def get_serializer_class(self):
         if self.action == "retrieve":
