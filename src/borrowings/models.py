@@ -29,7 +29,8 @@ class Borrowing(models.Model):
         ]
 
     def clean(self):
-        if self.expected_return_date < self.borrow_date:
+        borrow_date = self.borrow_date or datetime.date.today()
+        if self.expected_return_date < borrow_date:
             raise ValidationError("Expected return date cannot be before borrow date")
 
     def save(self, *args, **kwargs):
