@@ -13,7 +13,7 @@ app_name = "payments"
 
 router = routers.DefaultRouter()
 router.register("payments", PaymentViewSet, basename="payments")
-router.register("stripe", StripePaymentViewSet)
+router.register("stripe", StripePaymentViewSet, basename="stripe")
 
 urlpatterns = [
     path("", include(router.urls)),
