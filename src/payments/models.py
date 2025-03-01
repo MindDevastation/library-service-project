@@ -37,7 +37,7 @@ class Payment(models.Model):
     )
     type = models.CharField(max_length=10, choices=Type.choices, default=Type.PAYMENT)
     borrowing = models.ForeignKey(
-        Borrowing, on_delete=models.CASCADE, related_name="payments"
+        Borrowing, on_delete=models.CASCADE, related_name="%(class)s_payments"
     )
     amount = models.DecimalField(
         max_digits=5, decimal_places=2, validators=[MinValueValidator(0.01)]
