@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 
 from borrowings.models import Borrowing
 from borrowings.serializers import (
@@ -22,6 +23,14 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         if self.action == "create":
             return BorrowingCreateSerializer
         return BorrowingListSerializer
+
+    def get_permissions(self):
+        permission_classes = [IsAuthenticated()]
+
+        # if self.action == "retrieve":
+        #    permission_classes = [IsBorrowingOwnerOrAdmin()]
+
+        return permission_classes
 
     def get_queryset(self):
         queryset = Borrowing.objects.select_related("user", "book").prefetch_related(
@@ -47,5 +56,10 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         ):
             if user_id.isdigit():
                 queryset = queryset.filter(user_id=user_id)
+
+        if self.request.user.is_superuser:
+            return queryset
+        if self.request.user.is_authenticated:
+            return queryset.filter(user=self.request.user)
 
         return queryset
