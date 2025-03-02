@@ -5,6 +5,30 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 from borrowings.models import Borrowing
+from users.models import User
+
+
+@receiver(post_save, sender=User)
+def send_registration_email(sender, instance, created, **kwargs):
+    if created:
+        print("Sending registration email")
+
+        subject = "Welcome to Our Service!"
+        html_message = render_to_string(
+            "registration_success_email.html", {"user": instance}
+        )
+        plain_message = strip_tags(html_message)
+        from_email = "no-reply@yourdomain.com"
+        to_email = instance.email
+
+        send_mail(
+            subject,
+            plain_message,
+            from_email,
+            [to_email],
+            html_message=html_message,
+            fail_silently=False,
+        )
 
 
 @receiver(post_save, sender=Borrowing)
