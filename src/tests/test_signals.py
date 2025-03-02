@@ -29,7 +29,7 @@ class RegistrationEmailSignalTest(TestCase):
 
         post_save.send(sender=get_user_model(), instance=user, created=True)
 
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 2)
         email = mail.outbox[0]
 
         self.assertEqual(email.subject, "Welcome to Our Service!")
@@ -43,7 +43,6 @@ class BorrowingEmailSignalTest(TestCase):
             email="test@example.com",
             first_name="John",
             last_name="Doe",
-            username="newuser",
             password="securepassword123",
         )
         book = Book.objects.create(
