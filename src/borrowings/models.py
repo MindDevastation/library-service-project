@@ -30,7 +30,12 @@ class Borrowing(models.Model):
             models.Index(fields=["borrow_date", "expected_return_date", "status"])
         ]
 
+    def clean_expected_return_date(self):
+        validator = ExpectedReturnDateValidator(error_class=ValidationError)
+        return validator(self.expected_return_date)
+
     def save(self, *args, **kwargs):
+        self.clean_expected_return_date()
         self.full_clean()
         if self.status == self.Status.RETURNED and not self.actual_return_date:
             self.actual_return_date = datetime.date.today()
