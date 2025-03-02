@@ -66,21 +66,38 @@ class Payment(models.Model):
 
 
 class StripePayment(Payment):
-    payment_intent_id = models.CharField(max_length=255, blank=True, null=True)
+    session_id = models.CharField(max_length=255, blank=True, null=True)
+    session_url = models.CharField(max_length=255, blank=True, null=True)
     objects = models.Manager()
 
-    def create_payment_intent(self):
+    def create_checkout_session(self):
+        base_url = "http://localhost:8000/api/payments/stripe-"
+
         try:
             stripe.api_key = settings.STRIPE_SECRET_KEY
 
-            payment_intent = stripe.PaymentIntent.create(
-                amount=int(self.amount * 100),
-                currency=self.currency.lower(),
-                metadata={"borrow_id": self.borrowing.id},
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": self.currency.lower(),
+                            "product_data": {
+                                "name": f"Payment for borrowing id {self.borrowing.id}",
+                            },
+                            "unit_amount": int(self.amount * 100),
+                        },
+                        "quantity": 1,
+                    }
+                ],
+                mode="payment",
+                success_url=base_url + "success/?session_id={CHECKOUT_SESSION_ID}",
+                cancel_url=base_url + "cancel/",
             )
-            self.payment_intent_id = payment_intent["id"]
+            self.session_id = session["id"]
+            self.session_url = session["url"]
             self.save()
-            return payment_intent
+            return session
         except stripe.error.StripeError as error:
             raise ValueError(f"Stripe error occurred: {error.user_message}")
 
@@ -88,41 +105,48 @@ class StripePayment(Payment):
 class PayPalPayment(Payment):
     paypal_order_id = models.CharField(max_length=255, blank=True, null=True)
     payer_id = models.CharField(max_length=255, blank=True, null=True)
+    approval_url = models.CharField(max_length=255, blank=True, null=True)
     objects = models.Manager()
 
     def create_order(self):
-        base_url = "http://localhost:8000/api/payments/paypal/"
+        base_url = "http://localhost:8000/api/payments/paypal-"
         try:
-            paypalrestsdk.configure({
-                "mode": settings.PAYPAL_MODE,  # sandbox или live
-                "client_id": settings.PAYPAL_CLIENT_ID,
-                "client_secret": settings.PAYPAL_SECRET,
-            })
-
-            payment = paypalrestsdk.Payment({
-                "intent": "sale",
-                "payer": {
-                    "payment_method": "paypal"
-                },
-                "transactions": [{
-                    "amount": {
-                        "total": str(self.amount),
-                        "currency": self.currency
-                    },
-                    "description": f"Payment for borrowing id {self.borrowing.id}"
-                }],
-                "redirect_urls": {
-                    "return_url": f"{base_url}success/",
-                    "cancel_url": f"{base_url}cancel/",
+            paypalrestsdk.configure(
+                {
+                    "mode": settings.PAYPAL_MODE,  # sandbox или live
+                    "client_id": settings.PAYPAL_CLIENT_ID,
+                    "client_secret": settings.PAYPAL_SECRET,
                 }
-            })
+            )
+
+            payment = paypalrestsdk.Payment(
+                {
+                    "intent": "sale",
+                    "payer": {"payment_method": "paypal"},
+                    "transactions": [
+                        {
+                            "amount": {
+                                "total": str(self.amount),
+                                "currency": self.currency,
+                            },
+                            "description": f"Payment for borrowing id {self.borrowing.id}",
+                        }
+                    ],
+                    "redirect_urls": {
+                        "return_url": f"{base_url}success/",
+                        "cancel_url": f"{base_url}cancel/",
+                    },
+                }
+            )
 
             if payment.create():
                 self.paypal_order_id = payment.id
-                self.save()
                 for link in payment.links:
                     if link.rel == "approval_url":
-                        return link.href
+                        self.approval_url = link.href
+                        break
+                self.save()
+                return self.approval_url
             else:
                 raise ValueError(f"PayPal payment creation failed: {payment.error}")
         except ResourceNotFound as e:

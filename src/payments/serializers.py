@@ -14,7 +14,6 @@ class StripePaymentCreateSerializer(serializers.ModelSerializer):
         model = StripePayment
         fields = ("type", "currency", "amount", "borrowing")
 
-
     def validate(self, data):
         if data["amount"] <= 0:
             raise serializers.ValidationError("Amount must be greater than zero.")
@@ -22,14 +21,8 @@ class StripePaymentCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         payment = StripePayment.objects.create(**validated_data)
-        payment.create_payment_intent()
+        payment.create_checkout_session()
         return payment
-
-
-class StripePaymentStatusUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StripePayment
-        fields = ("status",)
 
 
 class PayPalPaymentListSerializer(serializers.ModelSerializer):
