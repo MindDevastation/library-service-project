@@ -8,10 +8,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from paypalrestsdk.exceptions import (
     ResourceNotFound,
-    ClientError,
-    ServerError,
-    MissingConfig,
-    InvalidConfig,
+    UnauthorizedAccess,
 )
 
 from borrowings.models import Borrowing
@@ -96,53 +93,41 @@ class PayPalPayment(Payment):
     def create_order(self):
         base_url = "http://localhost:8000/api/payments/paypal/"
         try:
-            paypalrestsdk.configure(
-                {
-                    "mode": settings.PAYPAL_MODE,
-                    "client_id": settings.PAYPAL_CLIENT_ID,
-                    "client_secret": settings.PAYPAL_SECRET,
-                }
-            )
+            paypalrestsdk.configure({
+                "mode": settings.PAYPAL_MODE,  # sandbox или live
+                "client_id": settings.PAYPAL_CLIENT_ID,
+                "client_secret": settings.PAYPAL_SECRET,
+            })
 
-            order_data = {
-                "intent": "CAPTURE",
-                "purchase_units": [
-                    {
-                        "amount": {
-                            "currency_code": self.currency,
-                            "value": str(self.amount),
-                        },
-                        "description": f"Payment for borrowing id {self.borrowing.id}",
-                    }
-                ],
-                "application_context": {
+            payment = paypalrestsdk.Payment({
+                "intent": "sale",
+                "payer": {
+                    "payment_method": "paypal"
+                },
+                "transactions": [{
+                    "amount": {
+                        "total": str(self.amount),
+                        "currency": self.currency
+                    },
+                    "description": f"Payment for borrowing id {self.borrowing.id}"
+                }],
+                "redirect_urls": {
                     "return_url": f"{base_url}success/",
                     "cancel_url": f"{base_url}cancel/",
-                },
-            }
+                }
+            })
 
-            order = paypalrestsdk.Order()
-            response = order.post('v1/checkout/orders', order_data)
-
-            if response:
-                self.paypal_order_id = response['id']
+            if payment.create():
+                self.paypal_order_id = payment.id
                 self.save()
-                for link in response['links']:
-                    if link['rel'] == "approve":
-                        return link['href']
+                for link in payment.links:
+                    if link.rel == "approval_url":
+                        return link.href
             else:
-                raise ValueError(f"PayPal order creation failed: {order.error}")
+                raise ValueError(f"PayPal payment creation failed: {payment.error}")
         except ResourceNotFound as e:
             raise ValueError(f"Resource not found: {str(e)}")
-        except ClientError as e:
-            raise ValueError(f"Client error: {str(e)}")
-        except ServerError as e:
-            raise ValueError(f"Server error: {str(e)}")
-        except ConnectionError as e:
-            raise ValueError(f"Connection error: {str(e)}")
-        except MissingConfig as e:
-            raise ValueError(f"Missing configuration: {str(e)}")
-        except InvalidConfig as e:
-            raise ValueError(f"Invalid configuration: {str(e)}")
+        except UnauthorizedAccess as e:
+            raise ValueError(f"Unauthorized access: {str(e)}")
         except Exception as e:
             raise ValueError(f"An unexpected error occurred: {str(e)}")

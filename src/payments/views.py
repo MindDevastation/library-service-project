@@ -7,19 +7,21 @@ from rest_framework.views import APIView
 
 from payments.models import StripePayment, PayPalPayment
 from payments.serializers import (
-    StripePaymentSerializer,
     StripePaymentStatusUpdateSerializer,
-    PayPalPaymentSerializer,
+    StripePaymentCreateSerializer,
+    StripePaymentListSerializer,
+    PayPalPaymentListSerializer,
+    PayPalPaymentCreateSerializer,
 )
 
 
 class PaymentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     def list(self, request, *args, **kwargs):
         stripe_payments = StripePayment.objects.all()
-        stripe_serializer = StripePaymentSerializer(stripe_payments, many=True)
+        stripe_serializer = StripePaymentListSerializer(stripe_payments, many=True)
 
         paypal_payments = PayPalPayment.objects.all()
-        paypal_serializer = PayPalPaymentSerializer(paypal_payments, many=True)
+        paypal_serializer = PayPalPaymentListSerializer(paypal_payments, many=True)
 
         return Response(
             {
@@ -30,19 +32,15 @@ class PaymentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         )
 
 
-class StripePaymentViewSet(
-    viewsets.GenericViewSet,
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-):
+class StripePaymentViewSet(viewsets.ModelViewSet):
     queryset = StripePayment.objects.all()
 
     def get_serializer_class(self):
+        if self.action == "create":
+            return StripePaymentCreateSerializer
         if self.action == "partial_update":
             return StripePaymentStatusUpdateSerializer
-        return StripePaymentSerializer
+        return StripePaymentListSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -58,11 +56,17 @@ class StripePaymentViewSet(
         return Response(response_data, status=status.HTTP_201_CREATED)
 
 
-class CreatePayPalPaymentView(APIView):
-    serializer_class = PayPalPaymentSerializer
+class PayPalPaymentViewSet(viewsets.ModelViewSet):
+    queryset = PayPalPayment.objects.all()
 
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+    def get_serializer_class(self):
+        if self.action == "create":
+            return PayPalPaymentCreateSerializer
+        return PayPalPaymentListSerializer
+
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             payment = serializer.save()
             approval_url = payment.create_order()
@@ -80,27 +84,24 @@ class CreatePayPalPaymentView(APIView):
 
 class PayPalPaymentSuccessView(APIView):
     def get(self, request):
-        token = request.GET.get("token")
+        token = request.GET.get("paymentId")
         payer_id = request.GET.get("PayerID")
 
         if token and payer_id:
             try:
-                paypalrestsdk.configure(
-                    {
-                        "mode": settings.PAYPAL_MODE,
-                        "client_id": settings.PAYPAL_CLIENT_ID,
-                        "client_secret": settings.PAYPAL_CLIENT_SECRET,
-                    }
-                )
+                paypalrestsdk.configure({
+                    "mode": settings.PAYPAL_MODE,
+                    "client_id": settings.PAYPAL_CLIENT_ID,
+                    "client_secret": settings.PAYPAL_SECRET,
+                })
 
                 paypal_payment = PayPalPayment.objects.get(paypal_order_id=token)
                 paypal_payment.payer_id = payer_id
 
-                order = paypalrestsdk.Order.find(token)
+                payment = paypalrestsdk.Payment.find(token)
 
-                if order:
-                    capture = order.capture()
-                    if capture:
+                if payment:
+                    if payment.execute({"payer_id": payer_id}):
                         paypal_payment.status = PayPalPayment.Status.PAID
                         paypal_payment.save()
                         return Response(
@@ -112,10 +113,6 @@ class PayPalPaymentSuccessView(APIView):
                             {"error": "Payment capture failed."},
                             status=status.HTTP_400_BAD_REQUEST,
                         )
-                else:
-                    return Response(
-                        {"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND
-                    )
 
             except ObjectDoesNotExist:
                 return Response(
