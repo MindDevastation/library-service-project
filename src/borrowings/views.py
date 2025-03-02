@@ -33,10 +33,8 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         return permission_classes
 
     def get_queryset(self):
-        queryset = Borrowing.objects.select_related("user", "book").prefetch_related(
-            "book__authors"
-        )
-
+        queryset = self.queryset
+        user = self.request.user
         is_active = self.request.query_params.get("is_active")
         user_id = self.request.query_params.get("user_id")
 
@@ -48,18 +46,11 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             if is_active.lower() == "false":
                 queryset = queryset.filter(status__in=[Borrowing.Status.RETURNED])
 
-        if (
-            user_id
-            and self.request.user.is_superuser
-            or user_id
-            and user_id == str(self.request.user.id)
-        ):
-            if user_id.isdigit():
+        if user_id and user_id.isdigit():
+            if user.is_superuser or user_id == str(user.id):
                 queryset = queryset.filter(user_id=user_id)
 
-        if self.request.user.is_superuser:
-            return queryset
-        if self.request.user.is_authenticated:
-            return queryset.filter(user=self.request.user)
+        if not user.is_superuser:
+            queryset = queryset.filter(user=user)
 
         return queryset
