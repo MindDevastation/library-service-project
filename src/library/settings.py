@@ -142,15 +142,22 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-SIMPLE_JWT = {
-    "AUTH_HEADER_TYPES": ("Authorize",),
-}
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=100),
+    "ROTATE_REFRESH_TOKENS": False,
+}
+
+
+AUTH_USER_MODEL = "users.User"
+
 # Logging
 
 LOGGING = {
