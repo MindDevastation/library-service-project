@@ -1,25 +1,19 @@
-from rest_framework import generics, viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from users.models import User
-from books.models import Book
-from books.serializers import BookSerializer
-from users.serializers import (
-    UserRegistrationSerializer,
-    UserProfileSerializer,
-)
+
+from users.serializers import UserSerializer
 
 
-class RegisterUserView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserRegistrationSerializer
+class CreateUserView(generics.CreateAPIView):
+    serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
 
-class UserProfileView(generics.RetrieveUpdateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserProfileSerializer
-    permission_classes = [IsAuthenticated]
+class ManageUserView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserSerializer
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (AllowAny,)
 
     def get_object(self):
         return self.request.user

@@ -1,5 +1,4 @@
 from rest_framework import viewsets
-from rest_framework import mixins
 
 from borrowings.models import Borrowing
 from borrowings.serializers import (
@@ -9,16 +8,13 @@ from borrowings.serializers import (
 )
 
 
-class BorrowingViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-):
+class BorrowingViewSet(viewsets.ModelViewSet):
     serializer_class = BorrowingListSerializer
     queryset = Borrowing.objects.select_related("user", "book").prefetch_related(
         "book__authors"
     )
+
+    http_method_names = ["get", "post"]
 
     def get_serializer_class(self):
         if self.action == "retrieve":
