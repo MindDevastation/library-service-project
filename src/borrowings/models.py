@@ -15,9 +15,7 @@ class Borrowing(models.Model):
         OVERDUE = "overdue", "Overdue"
 
     borrow_date = models.DateField(auto_now_add=True)
-    expected_return_date = models.DateField(
-        validators=[ExpectedReturnDateValidator(error_class=ValidationError)]
-    )
+    expected_return_date = models.DateField()
     actual_return_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=8, choices=Status.choices)
     book = models.ForeignKey(
@@ -32,7 +30,12 @@ class Borrowing(models.Model):
             models.Index(fields=["borrow_date", "expected_return_date", "status"])
         ]
 
+    def clean_expected_return_date(self):
+        validator = ExpectedReturnDateValidator(error_class=ValidationError)
+        return validator(self.expected_return_date)
+
     def save(self, *args, **kwargs):
+        self.clean_expected_return_date()
         self.full_clean()
         if self.status == self.Status.RETURNED and not self.actual_return_date:
             self.actual_return_date = datetime.date.today()
