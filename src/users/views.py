@@ -1,13 +1,16 @@
-from rest_framework import generics, viewsets, status
-from rest_framework.permissions import AllowAny, IsAdminUser
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.response import Response
-from rest_framework.exceptions import MethodNotAllowed
-
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
 from users.models import User
-from books.models import Book
-from books.serializers import BookSerializer
 from users.serializers import UserRegistrationSerializer, UserProfileSerializer
+from rest_framework.permissions import BasePermission
+
+
+class IsBorrowingOwnerOrAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_staff or request.user == obj.user
 
 
 class RegisterUserView(generics.CreateAPIView):
@@ -23,17 +26,3 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
-
-
-class BookViewSet(viewsets.ModelViewSet):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    authentication_classes = [JWTAuthentication]
-
-    def get_permissions(self):
-        if self.action in ["list", "retrieve"]:
-            return [AllowAny()]
-        return [IsAdminUser()]
-
-    def destroy(self, request, *args, **kwargs):
-        raise MethodNotAllowed("DELETE", detail="Delete is not accepted.")
