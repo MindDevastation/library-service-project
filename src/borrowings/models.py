@@ -15,9 +15,7 @@ class Borrowing(models.Model):
         OVERDUE = "overdue", "Overdue"
 
     borrow_date = models.DateField(auto_now_add=True)
-    expected_return_date = models.DateField(
-        validators=[ExpectedReturnDateValidator(error_class=ValidationError)]
-    )
+    expected_return_date = models.DateField()
     actual_return_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=8, choices=Status.choices)
     book = models.ForeignKey(
