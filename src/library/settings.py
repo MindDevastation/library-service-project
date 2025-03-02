@@ -30,7 +30,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-job=!mu53051-giox5!rrxr!q(27n2ift-)f$pbis)@^1k&59#"
 
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -72,7 +71,9 @@ ROOT_URLCONF = "library.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [
+            BASE_DIR / "templates",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -143,7 +144,6 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -151,11 +151,11 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
+    "AUTH_HEADER_TYPES": ("Authorize",),
     "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=100),
     "ROTATE_REFRESH_TOKENS": False,
 }
-
 
 AUTH_USER_MODEL = "users.User"
 
