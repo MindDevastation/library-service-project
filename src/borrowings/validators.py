@@ -26,7 +26,7 @@ class ExpectedReturnDateValidator:
 
     def __call__(self, expected_return_date):
         today = date.today()
-        if expected_return_date <= today:
+        if expected_return_date < today:
             raise self.error_class(self.message_if_before_borrow)
         if expected_return_date > today + timedelta(days=self.max_days):
             raise self.error_class(
