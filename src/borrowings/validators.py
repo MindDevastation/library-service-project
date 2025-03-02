@@ -37,7 +37,7 @@ class ExpectedReturnDateValidator:
 
 class BorrowingUniqueValidator:
 
-    message = "You already has an active borrowing for this book"
+    message = "You already have an active borrowing for this book"
 
     def __init__(self, user, error_class=SerializerValidationError):
         self.user = user
