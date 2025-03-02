@@ -26,3 +26,28 @@ def send_borrowing_confirmation_email(sender, instance, created, **kwargs):
             html_message=html_message,
             fail_silently=True,
         )
+
+
+@receiver(post_save, sender=Borrowing)
+def send_borrowing_status_update(sender, instance, **kwargs):
+    if instance.status in [Borrowing.Status.RETURNED, Borrowing.Status.OVERDUE]:
+        user = instance.user
+        if user:
+            print(f"Borrowing status updated to: {instance.status}")
+
+            subject = f"Borrowing {instance.id} Status Update"
+            html_message = render_to_string(
+                "borrowing_status_update_email.html", {"borrowing": instance}
+            )
+            plain_message = strip_tags(html_message)
+            from_email = "no-reply@yourdomain.com"
+            to_email = instance.user.email
+
+            send_mail(
+                subject,
+                plain_message,
+                from_email,
+                [to_email],
+                html_message=html_message,
+                fail_silently=True,
+            )
