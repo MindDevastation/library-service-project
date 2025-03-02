@@ -25,6 +25,11 @@ Run:
   pre-commit install
 ```
 
+Run:
+````bash
+   pip install djangorestframework-simplejwt
+````
+
 It will run `black` every time you make a commit
 
 Also you can 

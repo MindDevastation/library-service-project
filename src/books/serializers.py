@@ -9,7 +9,6 @@ class AuthorSerializer(serializers.ModelSerializer):
 
 
 class BookSerializer(serializers.ModelSerializer):
-    authors = AuthorSerializer(many=True)
     quantity = serializers.ReadOnlyField()
 
     class Meta:
@@ -25,6 +24,7 @@ class BookSerializer(serializers.ModelSerializer):
             "quantity",
         ]
         read_only_fields = ["id", "quantity"]
+        depth = 1
 
     def create(self, validated_data):
         authors_data = validated_data.pop("authors")
