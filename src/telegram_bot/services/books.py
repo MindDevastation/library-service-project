@@ -1,14 +1,3 @@
-# from asgiref.sync import sync_to_async
-# from books.models import Book
-#
-# @sync_to_async
-# def get_books_sync():
-#     return Book.objects.all()
-#
-# async def get_books():
-#     books = await get_books_sync()
-#     return books
-
 from telegram_bot.services.db import database
 
 
@@ -26,6 +15,8 @@ async def get_books():
     JOIN 
         books_author author ON ba.author_id = author.id
     GROUP BY 
+        book.id
+    ORDER BY 
         book.id;
     """
     rows = await database.fetch_all(query)

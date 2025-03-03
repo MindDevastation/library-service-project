@@ -45,34 +45,47 @@ Now black will format the code when you press `Ctrl + Alt + L`.
 <pre>
 library-service-project/
 ├── src/
-│   ├── library/       # Main project (settings, routes)
-│   ├── users/         # User management application
-│   ├── books/         # Book management application
-│   ├── borrowings/    # Booking management application
-│   ├── payments/      # Payment application
-│   ├── logs/          # System Logs
-│   ├── templates/     # Email templates (e.g., return reminders)
-│   ├── library_db_data.json  # Initial data (optional)
-│   ├── telegram_bot/
+│   ├── library/            # Main project (settings, routes)
+│   ├── users/              # User management application
+│   ├── books/              # Book management application
+│   ├── borrowings/         # Booking management application
+│   ├── payments/           # Payment application
+│   ├── logs/               # System Logs
+│   ├── templates/          # Email templates
+│   ├── telegram_bot/       # Telegram bot
 │   │   ├── __init__.py
-│   │   ├── config.py  # Configuration (bot token, API URL)
-│   │   ├── main.py  # Starting the bot
-│   │   ├── handlers/  # Command handlers
+│   │   ├── config.py       # Configuration (bot token, API URL)
+│   │   ├── main.py         # Starting the bot
+│   │   ├── activity.py     # Activity logging
+│   │   ├── handlers/       # Command handlers
+│   │   │   ├── start.py    # /start command handler
+│   │   │   ├── auth.py     # User authorization handler
+│   │   │   ├── books.py    # Book management handler
+│   │   │   ├── borrowing.py # Booking handler
+│   │   │   ├── help.py     # Help command handler
+│   │   │   ├── me.py       # User info handler
+│   │   │   ├── stop.py     # Stop handler
+│   │   ├── middlewares/    # Middleware (if any)
+│   │   ├── keyboards/      # Custom keyboards for user interactions
+│   │   ├── services/       # API requests (auth, books, borrowing)
 │   │   │   ├── __init__.py
-│   │   │   ├── start.py  # Процессор /start
-│   │   │   ├── auth.py  # User authorization
-│   │   ├── middlewares/  # Middleware (if needed)
-│   │   ├── keyboards/  # Keyboards
-│   │   ├── services/  # API requests
-│   │   └── utils/  # Additional Functions
-│   └── manage.py
-├── requirements.txt   # Dependencies
-├── Dockerfile         # Containerization
-├── docker-compose.yml # Конфигурация Docker
-├── .env               # Environment variables
-├── .gitignore         # Ignored files
-├── README.md          # Documentation
-└── .pre-commit-config.yaml  # Pre-commit hooks
+│   │   │   ├── auth.py     # Auth API
+│   │   │   ├── books.py    # Books API
+│   │   │   ├── borrowing.py # Borrowing API
+│   │   │   ├── bot.py      # Bot-related functions
+│   │   │   ├── db.py       # Database interaction functions
+│   │   │   ├── me.py       # User info API
+│   │   ├── media/          # Media files (images, videos)
+│   │   └── utils/          # Utility functions
+├── requirements.txt        # Dependencies
+├── Dockerfile              # Docker containerization
+├── docker-compose.yml      # Docker configuration
+├── .env                    # Environment variables
+├── .gitignore              # Git ignore file
+├── README.md               # Documentation
+└── .pre-commit-config.yaml # Pre-commit hooks
+
+
 </pre>
 
 | Микросервис на диаграмме | 	Соответствие в Django монолите |
@@ -272,3 +285,192 @@ stripe.api_key = STRIPE_SECRET_KEY
 ### In order to pay use following card data:
 - Visa	4242424242424242	cvv Any 3 digits	Any future date
 - Mastercard	5555555555554444	cvv Any 3 digits	Any future date
+
+## Telegram bot
+
+## Bot structure:
+
+<pre>
+│   ├── telegram_bot/       # Telegram bot
+│   │   ├── __init__.py
+│   │   ├── config.py       # Configuration (bot token, API URL)
+│   │   ├── main.py         # Starting the bot
+│   │   ├── activity.py     # Activity logging
+│   │   ├── handlers/       # Command handlers
+│   │   │   ├── start.py    # /start command handler
+│   │   │   ├── auth.py     # User authorization handler
+│   │   │   ├── books.py    # Book management handler
+│   │   │   ├── borrowing.py # Booking handler
+│   │   │   ├── help.py     # Help command handler
+│   │   │   ├── me.py       # User info handler
+│   │   │   ├── stop.py     # Stop handler
+│   │   ├── middlewares/    # Middleware (if any)
+│   │   ├── keyboards/      # Custom keyboards for user interactions
+│   │   ├── services/       # API requests (auth, books, borrowing)
+│   │   │   ├── __init__.py
+│   │   │   ├── auth.py     # Auth API
+│   │   │   ├── books.py    # Books API
+│   │   │   ├── borrowing.py # Borrowing API
+│   │   │   ├── bot.py      # Bot-related functions
+│   │   │   ├── db.py       # Database interaction functions
+│   │   │   ├── me.py       # User info API
+│   │   ├── media/          # Media files (images, videos)
+│   │   └── utils/          # Utility functions
+</pre>
+
+### Info
+
+You can use different approaches in Telegram bots depending on 
+the requirements of the project and the libraries used. Here are the main ones:
+
+### 1. Using `aiogram` (Asynchronous approach)
+- Main idea: aiogram is an asynchronous library for building Telegram bots that uses asyncio for interacting with the Telegram API. It allows handling requests and commands concurrently, improving performance.
+- Best for: Projects where high performance is important, with a large number of users and asynchronous interaction with external services (e.g., databases or APIs).
+- Advantages:
+- - Support for asynchronous operations.
+- - Easy webhook handling.
+- - Fast message and command processing.
+- Example: Suitable for complex bots that need to handle many requests simultaneously and interact efficiently with network resources.
+### 2. Using `python-telegram-bot` (Synchronous approach)
+- Main idea: This is a more traditional synchronous library for building Telegram bots. It's easy to use but less efficient for high-traffic bots.
+- Best for: Smaller projects or when high performance is not critical.
+- Advantages:
+- - Simple to use.
+- - Well-documented and maintained.
+- Disadvantages: Can cause delays when scaling due to its synchronous nature.
+### 3. Using `telebot` (Synchronous approach)
+- Main idea: telebot is another synchronous library that is simple and popular among beginners. It is suitable for creating bots with basic functionality.
+- Best for: Simple bots with few commands and no need for asynchronous interaction with other services.
+- Advantages:
+- - Easy to set up and use.
+- - Ideal for small projects.
+- - Disadvantages: Limited functionality compared to more powerful libraries like aiogram.
+### 4. Webhooks vs. Polling
+- Polling: In polling, the bot periodically checks the Telegram server to receive new messages. This is a simple approach but may cause additional load.
+
+- - Advantages: Easy to set up and suitable for small projects.
+- - Disadvantages: Lower performance compared to webhooks.
+- Webhooks: With webhooks, Telegram server sends notifications to a specified URL when new messages are received. This is a more efficient approach for high-traffic bots.
+
+- - Advantages: Less load on the server, faster response to events.
+- - Disadvantages: Requires setting up a server to handle incoming requests.
+### 5. Microservice Architecture
+- Main idea: Create a Telegram bot as a microservice that interacts with other services via APIs. Each component, such as user authentication, payments, books, etc., could be a separate microservice.
+- Best for: Large projects that require dividing logic into independent components that can be scaled and developed separately.
+- Advantages:
+- - Easier to maintain and extend.
+- - Responsibility is divided among different parts of the system.
+- Disadvantages: Requires more resources for development and maintenance.
+### 6. Using Databases and Caching
+- Main idea: For bots with complex logic and state storage (e.g., user data or progress tracking), databases and caching mechanisms are used for efficient data storage and retrieval.
+- Best for: Projects where data needs to be stored across sessions or when tracking user state.
+- Example: Using Redis or a database (e.g., PostgreSQL) for data caching and user state management.
+
+In this project we are using `aiogram` library
+
+### What is `aiogram`
+
+`aiogram` is an asynchronous Python library for building Telegram bots using the asyncio framework. It is designed to handle a large number of requests efficiently by enabling concurrent operations. It provides a simple, easy-to-use interface for interacting with the Telegram Bot API.
+
+### Key Features:
+- Asynchronous: Built on top of asyncio, allowing you to handle multiple requests concurrently without blocking the event loop.
+- Fast: Because of its async nature, it is highly scalable and handles high loads effectively.
+- Simple API: It provides a straightforward way to interact with Telegram, including handling messages, commands, inline queries, and custom keyboards.
+- Webhooks Support: Supports both long polling and webhooks, enabling efficient handling of incoming updates.
+- Comprehensive: Includes utilities for managing states, middlewares, and error handling.
+### Use Cases:
+- Ideal for building complex, high-performance bots that require fast response times and can scale with high traffic.
+
+## *aiogram* vs *Telegram API* vs *Django ORM*
+
+### 1. aiogram
+- What it is: aiogram is a Python library specifically designed for building Telegram bots asynchronously using Python's asyncio framework.
+- Key features:
+- - Handles Telegram Bot API interactions using asyncio, allowing concurrent message handling.
+- - Built-in support for commands, messages, inline keyboards, and webhooks.
+- - Efficient and scalable, handling multiple updates at once without blocking.
+- - Ideal for large-scale bots with high traffic or complex workflows.
+- Use case: If you're building a high-performance Telegram bot in Python, aiogram is the go-to choice due to its asynchronous nature, ease of integration with webhooks, and simple API for interacting with Telegram.
+### 2. Telegram API
+- What it is: The Telegram Bot API is the core API provided by Telegram to interact with their platform, allowing you to send and receive messages, manage bots, and access user data.
+- Key features:
+- - Provides direct access to Telegram servers.
+- - You interact with it using HTTP requests (either via polling or webhooks).
+- - It is language-agnostic, meaning you can interact with it using any programming language that supports HTTP requests.
+- Use case: The Telegram API is the fundamental protocol that any bot interacts with, but it doesn’t provide higher-level abstractions like aiogram or other libraries. You can directly use the API with libraries like requests or http.client in Python, but this requires more manual work.
+### 3. Django ORM
+- What it is: Django ORM (Object-Relational Mapping) is a part of the Django web framework used to interact with databases in a Pythonic way. It maps database tables to Python classes, making it easier to query and manipulate data stored in a database.
+- Key features:
+- - Allows easy interaction with relational databases like PostgreSQL, MySQL, SQLite, etc.
+- - Handles database migrations, models, and relationships automatically.
+- - Ideal for managing persistent data (e.g., user accounts, messages, logs) in web applications, including bots.
+- Use case: Django ORM is not used directly for building Telegram bots. However, if you are building a bot that needs to interact with a database (for example, to store user data, messages, or other persistent information), Django ORM can be a great tool for managing that data.
+
+### Main Commands
+#### `/start`
+
+Starts interaction with the bot and provides information about its functionality.
+
+#### `/help`
+
+Displays instructions on how to use the bot.
+
+### Bot Structure
+- handlers/ — Directory containing command handlers. Each file in this directory handles a specific command.
+- services/ — Directory that contains the logic for interacting with the API for users, books, bookings, and payments.
+- keyboards/ — Directory containing custom keyboards for user interactions.
+- middlewares/ — Directory for middleware, if needed.
+- config.py — Configuration file with bot token and API URL.
+
+### config.py
+This file contains essential information to run the bot. Be sure to add your Telegram bot token and API URL here.
+
+```python
+TELEGRAM_BOT_TOKEN = "your_telegram_bot_token"
+API_URL = "http://your-api-url.com"
+```
+
+### Router 
+
+In aiogram, the Router is a feature introduced in version 3.0 that helps 
+to manage and organize the routing of updates (messages, commands, events) 
+in a Telegram bot. It allows you to easily define handlers for different types 
+of updates, such as messages, commands, or even custom events, and organize your 
+code more efficiently.
+
+### async
+
+In Python, `async` is a keyword used to define asynchronous functions, 
+which allow your program to run code concurrently, without blocking other 
+operations. This is particularly useful when dealing with I/O-bound 
+tasks such as handling web requests, reading files, or working with APIs 
+(like the Telegram Bot API in aiogram).
+
+Here’s a brief breakdown of key concepts related to async and how it works:
+
+#### Key Concepts of async in Python:
+1. **`async` Keyword:**
+
+- You use async before a function definition to mark it as asynchronous. An asynchronous function is a coroutine, which means it can pause and resume its execution.
+- Example:
+```python
+async def my_async_function():
+    print("This is async!")
+```
+2. **`await` Keyword:**
+
+- Inside an async function, you can use await to pause the function and wait for a result from another asynchronous operation, like an HTTP request, database query, or a bot update.
+- Example:
+```python
+async def fetch_data():
+    result = await some_async_task()  # This pauses until the task completes
+    print(result)
+```
+3. **Event Loop:**
+
+- An event loop is responsible for executing asynchronous code. It runs the asynchronous tasks and ensures that your program doesn't block other tasks while waiting for something to complete (like fetching data from an API).
+- Python’s `asyncio` library is used to manage the event loop, and most asynchronous libraries (like aiogram) rely on it.
+4. **Concurrency vs. Parallelism:**
+
+- **Concurrency** means that multiple tasks can make progress without waiting for one another. However, they don't necessarily run at the same time. This is the key benefit of using async.
+- **Parallelism** involves tasks running at the same time (which typically requires multi-threading or multi-processing). In contrast, async does not use multiple threads, but it allows tasks to pause while waiting for I/O-bound operations, enabling the event loop to run other tasks in the meantime.
