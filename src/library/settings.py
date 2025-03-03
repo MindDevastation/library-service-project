@@ -206,10 +206,11 @@ LOGGING = {
         },
         "borrowing_user_actions": {
             "handlers": ["borrowing_payment_actions_file"],
-        "user_actions": {
-            "handlers": ["actions_file"],
-            "level": "INFO",
-            "propagate": False,
+            "user_actions": {
+                "handlers": ["actions_file"],
+                "level": "INFO",
+                "propagate": False,
+            },
         },
     },
 }
