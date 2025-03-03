@@ -30,7 +30,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-job=!mu53051-giox5!rrxr!q(27n2ift-)f$pbis)@^1k&59#"
 
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -72,7 +71,9 @@ ROOT_URLCONF = "library.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [
+            BASE_DIR / "templates",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -143,17 +144,21 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
-SIMPLE_JWT = {
-    "AUTH_HEADER_TYPES": ("Authorize",),
-}
-
-
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
+
+SIMPLE_JWT = {
+    "AUTH_HEADER_TYPES": ("Authorize",),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=100),
+    "ROTATE_REFRESH_TOKENS": False,
+}
+
+AUTH_USER_MODEL = "users.User"
+
 # Logging
 
 LOGGING = {
@@ -187,3 +192,18 @@ LOGGING = {
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
+
+# PayPal
+
+PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
+PAYPAL_SECRET = os.getenv("PAYPAL_SECRET")
+PAYPAL_MODE = os.getenv("PAYPAL_MODE")
+
+# Mailing
+
+EMAIL_BACKEND = os.environ["EMAIL_BACKEND"]
+EMAIL_HOST = os.environ["EMAIL_HOST"]
+EMAIL_PORT = os.environ["EMAIL_PORT"]
+EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
+EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
+DEFAULT_FROM_EMAIL = os.environ["DEFAULT_FROM_EMAIL"]
