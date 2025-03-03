@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.serializers import Serializer
 
-# from borrowings.permissions import IsBorrowingOwnerOrAdmin
+from borrowings.schema import borrowings_schema_view
+from borrowings.permissions import IsBorrowingOwnerOrAdmin, HasNoPendingPayments
 from borrowings.models import Borrowing
 from borrowings.serializers import (
     BorrowingDetailSerializer,
@@ -13,14 +14,22 @@ from borrowings.serializers import (
 )
 
 
+@borrowings_schema_view
 class BorrowingViewSet(viewsets.ModelViewSet):
     serializer_class = BorrowingListSerializer
     queryset = Borrowing.objects.select_related("user", "book").prefetch_related(
         "book__authors"
     )
-    # permission_classes = [IsBorrowingOwnerOrAdmin]
 
     http_method_names = ["get", "post"]
+
+    def get_permissions(self):
+        permission_classes = [IsBorrowingOwnerOrAdmin()]
+
+        if self.action == "create":
+            permission_classes = [IsBorrowingOwnerOrAdmin(), HasNoPendingPayments()]
+
+        return permission_classes
 
     def get_serializer_class(self):
         if self.action == "retrieve":
