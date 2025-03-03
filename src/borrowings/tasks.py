@@ -48,7 +48,8 @@ def send_telegram_notification(message):
 
 
 @shared_task
-def check_overdue_borrowings():
+def check_and_update_overdue_borrowings():
+
     today = now().date()
 
     borrowings_to_update = Borrowing.objects.filter(
