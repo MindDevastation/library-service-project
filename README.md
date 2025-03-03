@@ -230,6 +230,10 @@ paypalrestsdk.configure({
 - Use sandbox test accounts from the PayPal Developer Dashboard.
 - Initiate a test payment using the API and verify transactions in the Sandbox Transactions section.
 
+### For logging into PayPal when you go to approval link use these credentials:
+- email -> sb-7crpl38155236@personal.example.com
+- password -> r/3TI90b
+
 ### 2. Setting Up Stripe (Test Mode)
 To integrate Stripe for test payments:
 
@@ -265,3 +269,6 @@ STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
 
 stripe.api_key = STRIPE_SECRET_KEY
 ```
+### In order to pay use following card data:
+- Visa	4242424242424242	cvv Any 3 digits	Any future date
+- Mastercard	5555555555554444	cvv Any 3 digits	Any future date
