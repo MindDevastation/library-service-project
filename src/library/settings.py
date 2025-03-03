@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "borrowings",
     "payments",
     "users",
+    "django_celery_beat",
     "logging_app",
 ]
 
@@ -164,7 +165,6 @@ SIMPLE_JWT = {
 
 AUTH_USER_MODEL = "users.User"
 
-
 # Logging
 
 LOGGING = {
@@ -233,3 +233,13 @@ EMAIL_PORT = os.environ["EMAIL_PORT"]
 EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
 EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
 DEFAULT_FROM_EMAIL = os.environ["DEFAULT_FROM_EMAIL"]
+
+
+# Celery Configuration Options
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_TIMEZONE = "Europe/Kyiv"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
