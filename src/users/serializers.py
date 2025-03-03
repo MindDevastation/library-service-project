@@ -34,18 +34,3 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "date_joined",
         )
         read_only_fields = ("email", "is_staff", "date_joined")
-
-
-class BorrowingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Borrowing
-        fields = "__all__"
-
-    def validate(self, attrs):
-        user = self.context["request"].user
-
-        if Payment.objects.filter(borrowing__user=user, status="PENDING").exists():
-            raise serializers.ValidationError(
-                "You have pending payments. You cannot create a new booking until they are paid.."
-            )
-        return attrs
