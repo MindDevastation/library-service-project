@@ -22,3 +22,21 @@ async def send_borrowing_notification(borrowing):
         await bot.send_message(user.telegram_id, message)
     except Exception as e:
         print(f"Error sending message: {e}")
+
+
+async def send_payment_notification(payment):
+    user = payment.borrowing.user
+    book = payment.borrowing.book
+    message = (
+        f"Hello, {user.first_name}!\n"
+        f"Thanks for you`re purchase!\n"
+        f"Your payment request for the book '{book.title}' has been processed.\n"
+        f"Your payment status: {payment.status}\n"
+        f"Payment id: {payment.payment_id}\n"
+        f"Money to pay: {payment.amount}\n"
+    )
+    try:
+        # Sending a message to a user via Telegram ID
+        await bot.send_message(user.telegram_id, message)
+    except Exception as e:
+        print(f"Error sending message: {e}")

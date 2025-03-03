@@ -11,7 +11,7 @@ from borrowings.models import Borrowing
 from telegram_bot.services.bot import send_borrowing_notification
 from users.models import User
 
-logger = logging.getLogger("borrowing_user_actions")
+logger = logging.getLogger("borrowing_payment_user_actions")
 
 
 @receiver(post_save, sender=User)
@@ -84,9 +84,9 @@ def send_borrowing_status_update(sender, instance, **kwargs):
 
 
 # Asynchronous wrapper for calling send_borrowing_notification
-async def send_notification_async(instance):
+async def send_notification_borrowing_async(instance):
     try:
-        # Отправка уведомления
+        # Sending a notification
         await send_borrowing_notification(instance)
         logger.info(
             f"📚 Borrowing created: '{instance.book.title}' for user {instance.user.email}. Notification sent."
@@ -107,7 +107,7 @@ def send_borrowing_notification_to_user(sender, instance, created, **kwargs):
                 asyncio.set_event_loop(loop)
 
                 # Starting an asynchronous task
-                loop.run_until_complete(send_notification_async(instance))
+                loop.run_until_complete(send_notification_borrowing_async(instance))
             except Exception as e:
                 logger.error(
                     f"❌ Error in creating event loop or sending notification: {str(e)}"
