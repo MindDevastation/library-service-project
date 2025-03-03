@@ -7,7 +7,7 @@ from django.dispatch import receiver
 from books.models import Book
 from borrowings.models import Borrowing
 from logging_app.models import ActionLog
-from payments.models import StripePayment
+from payments.models import StripePayment, PayPalPayment
 
 logger = logging.getLogger("user_actions")
 
@@ -54,17 +54,38 @@ def log_borrowing_deletion(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=StripePayment)
-def log_payment_changes(sender, instance, created, **kwargs):
+def log_stripe_payment_changes(sender, instance, created, **kwargs):
     action = "created" if created else "updated"
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    logger.info(f"{timestamp} - Payment №{instance.id} {action}")
-    ActionLog.objects.create(action=action, model_name="Payment", object_id=instance.id)
+    logger.info(f"{timestamp} - Stripe Payment №{instance.id} {action}")
+    ActionLog.objects.create(
+        action=action, model_name="StripePayment", object_id=instance.id
+    )
 
 
 @receiver(post_delete, sender=StripePayment)
-def log_payment_deletion(sender, instance, **kwargs):
+def log_stripe_payment_deletion(sender, instance, **kwargs):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    logger.info(f"{timestamp} - Payment №{instance.id} deleted")
+    logger.info(f"{timestamp} - Stripe Payment №{instance.id} deleted")
     ActionLog.objects.create(
-        action="deleted", model_name="Payment", object_id=instance.id
+        action="deleted", model_name="StripePayment", object_id=instance.id
+    )
+
+
+@receiver(post_save, sender=PayPalPayment)
+def log_paypal_payment_changes(sender, instance, created, **kwargs):
+    action = "created" if created else "updated"
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    logger.info(f"{timestamp} - PayPal Payment №{instance.id} {action}")
+    ActionLog.objects.create(
+        action=action, model_name="PayPalPayment", object_id=instance.id
+    )
+
+
+@receiver(post_delete, sender=PayPalPayment)
+def log_paypal_payment_deletion(sender, instance, **kwargs):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    logger.info(f"{timestamp} - PayPal Payment №{instance.id} deleted")
+    ActionLog.objects.create(
+        action="deleted", model_name="PayPalPayment", object_id=instance.id
     )

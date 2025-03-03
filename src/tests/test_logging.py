@@ -12,7 +12,7 @@ from logging_app.middleware import ExceptionLoggingMiddleware
 from users.models import User
 from books.models import Book
 from borrowings.models import Borrowing
-from payments.models import StripePayment
+from payments.models import StripePayment, PayPalPayment
 from logging_app.models import ActionLog
 
 
@@ -133,17 +133,19 @@ class LoggingSignalsTestCase(TestCase):
             self.logger_output.getvalue(),
         )
 
-    def test_payment_create_log(self):
+    def test_stripe_payment_create_log(self):
         payment = StripePayment.objects.create(
             borrowing=self.borrowing, amount=15.00, status="PENDING", currency="USD"
         )
         log_entry = ActionLog.objects.filter(
-            model_name="Payment", object_id=payment.id, action="created"
+            model_name="StripePayment", object_id=payment.id, action="created"
         ).first()
         self.assertIsNotNone(log_entry)
-        self.assertIn(f"Payment №{payment.id} created", self.logger_output.getvalue())
+        self.assertIn(
+            f"Stripe Payment №{payment.id} created", self.logger_output.getvalue()
+        )
 
-    def test_payment_update_log(self):
+    def test_stripe_payment_update_log(self):
         payment = StripePayment.objects.create(
             borrowing=self.borrowing, amount=20.00, status="PENDING", currency="USD"
         )
@@ -151,12 +153,14 @@ class LoggingSignalsTestCase(TestCase):
         payment.save()
 
         log_entry = ActionLog.objects.filter(
-            model_name="Payment", object_id=payment.id, action="updated"
+            model_name="StripePayment", object_id=payment.id, action="updated"
         ).first()
         self.assertIsNotNone(log_entry)
-        self.assertIn(f"Payment №{payment.id} updated", self.logger_output.getvalue())
+        self.assertIn(
+            f"Stripe Payment №{payment.id} updated", self.logger_output.getvalue()
+        )
 
-    def test_payment_delete_log(self):
+    def test_stripe_payment_delete_log(self):
         payment = StripePayment.objects.create(
             borrowing=self.borrowing, amount=25.00, status="PENDING", currency="USD"
         )
@@ -164,7 +168,51 @@ class LoggingSignalsTestCase(TestCase):
         payment.delete()
 
         log_entry = ActionLog.objects.filter(
-            model_name="Payment", object_id=payment_id, action="deleted"
+            model_name="StripePayment", object_id=payment_id, action="deleted"
         ).first()
         self.assertIsNotNone(log_entry)
-        self.assertIn(f"Payment №{payment_id} deleted", self.logger_output.getvalue())
+        self.assertIn(
+            f"Stripe Payment №{payment_id} deleted", self.logger_output.getvalue()
+        )
+
+    def test_paypal_payment_create_log(self):
+        payment = PayPalPayment.objects.create(
+            borrowing=self.borrowing, amount=15.00, status="PENDING", currency="USD"
+        )
+        log_entry = ActionLog.objects.filter(
+            model_name="PayPalPayment", object_id=payment.id, action="created"
+        ).first()
+        self.assertIsNotNone(log_entry)
+        self.assertIn(
+            f"PayPal Payment №{payment.id} created", self.logger_output.getvalue()
+        )
+
+    def test_paypal_payment_update_log(self):
+        payment = PayPalPayment.objects.create(
+            borrowing=self.borrowing, amount=20.00, status="PENDING", currency="USD"
+        )
+        payment.status = "PAID"
+        payment.save()
+
+        log_entry = ActionLog.objects.filter(
+            model_name="PayPalPayment", object_id=payment.id, action="updated"
+        ).first()
+        self.assertIsNotNone(log_entry)
+        self.assertIn(
+            f"PayPal Payment №{payment.id} updated", self.logger_output.getvalue()
+        )
+
+    def test_paypal_payment_delete_log(self):
+        payment = PayPalPayment.objects.create(
+            borrowing=self.borrowing, amount=25.00, status="PENDING", currency="USD"
+        )
+        payment_id = payment.id
+        payment.delete()
+
+        log_entry = ActionLog.objects.filter(
+            model_name="PayPalPayment", object_id=payment_id, action="deleted"
+        ).first()
+        self.assertIsNotNone(log_entry)
+        self.assertIn(
+            f"PayPal Payment №{payment_id} deleted", self.logger_output.getvalue()
+        )

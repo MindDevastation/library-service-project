@@ -45,14 +45,15 @@ Now black will format the code when you press `Ctrl + Alt + L`.
 <pre>
 library-service-project/
 ├── src/
-│   ├── library/            # Main project (settings, routes)
-│   ├── users/              # User management application
-│   ├── books/              # Book management application
-│   ├── borrowings/         # Booking management application
-│   ├── payments/           # Payment application
-│   ├── logs/               # System Logs
-│   ├── templates/          # Email templates
-│   ├── telegram_bot/       # Telegram bot
+│   ├── library/       # Main project (settings, routes)
+│   ├── users/         # User management application
+│   ├── books/         # Book management application
+│   ├── borrowings/    # Booking management application
+│   ├── payments/      # Payment application
+│   ├── logging_app/   # Logging application
+│   ├── templates/     # Email templates (e.g., return reminders)
+│   ├── library_db_data.json  # Initial data (optional)
+│   ├── telegram_bot/
 │   │   ├── __init__.py
 │   │   ├── config.py       # Configuration (bot token, API URL)
 │   │   ├── main.py         # Starting the bot
@@ -190,7 +191,69 @@ Now your project is set up for email notifications using MailTrap! 🎉
 
 **Example:**
 
-![img.png](img.png)
+![mailtrap.png](mailtrap.png)
+
+If you don't want to create MailTrap account, you can use following credentials in settings.py:
+
+```ini
+EMAIL_HOST_USER="63300fac82c4e7"
+EMAIL_HOST_PASSWORD="cff332583ed0a1"
+```
+
+Or you can setup console email backend in settings.py:
+
+```ini
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+```
+
+
+## Logging System
+
+This project implements a logging system to track user actions and system errors.
+It helps with debugging, monitoring user activity, and maintaining data integrity.
+
+### 1. User Action Logging
+
+User actions such as creating, updating, and deleting records are automatically logged in the database.
+This is done via Django signals, ensuring that all changes are recorded without modifying the main business logic.
+
+Creating, updating, and deleting Book, Borrowing, and Payment records.
+
+### 2. Error Logging
+
+All application errors are logged using Python's built-in logging module.
+This helps in diagnosing issues without exposing sensitive error messages to users.
+
+Logs are stored in the database and in a file (logs/errors.log).
+
+### 3. How to View Logs?
+
+#### User Action Logs:
+
+Run the following query in Django shell:
+
+```python
+from logging_app.models import ActionLog
+ActionLog.objects.all()
+```
+
+Or check action logs in file:
+
+`logs/actions.log`
+
+#### Error Logs:
+
+Run the following query in Django shell:
+
+```python
+from logging_app.models import ErrorLog
+ErrorLog.objects.all()
+```
+
+Or check error logs in file:
+
+`logs/errors.log`
+
 
 ## Setting Up Payments with PayPal and Stripe (Test Mode)
 
