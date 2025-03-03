@@ -92,3 +92,22 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
                 **validated_data,
             )
             return borrowing
+
+
+class PaymentChoiceSerializer(serializers.Serializer):
+    class ProviderChoices:
+        STRIPE = "stripe"
+        PAYPAL = "paypal"
+        CHOICES = [
+            (STRIPE, "Stripe"),
+            (PAYPAL, "PayPal"),
+        ]
+
+    class CurrencyChoices:
+        USD = "USD"
+        CHOICES = [
+            (USD, "US Dollar"),
+        ]
+
+    provider = serializers.ChoiceField(choices=ProviderChoices.CHOICES)
+    currency = serializers.ChoiceField(choices=CurrencyChoices.CHOICES)
