@@ -1,12 +1,10 @@
-import json
 import logging
+from datetime import datetime
 from decimal import Decimal
 from io import StringIO
 from django.test import TestCase
-from unittest.mock import Mock
-from django.core.exceptions import ValidationError, PermissionDenied
-from django.db import DatabaseError
-from requests.exceptions import RequestException
+from unittest.mock import patch
+from django.core.exceptions import ValidationError
 from django.test import RequestFactory
 
 from logging_app.middleware import ExceptionLoggingMiddleware
@@ -20,96 +18,22 @@ from logging_app.models import ActionLog
 
 class TestExceptionLoggingMiddleware(TestCase):
 
-    @staticmethod
-    def _process_exception(request, exception):
-        mock_get_response = Mock()
-        middleware = ExceptionLoggingMiddleware(get_response=mock_get_response)
-
-        response = middleware.process_exception(request, exception)
-        response_data = json.loads(response.content)
-
-        return response, response_data
-
     def setUp(self):
         self.factory = RequestFactory()
-        self.sample_request = self.factory.get("/some-url/")
+        self.middleware = ExceptionLoggingMiddleware(get_response=lambda request: None)
 
-    def test_validation_error(self):
-        request = self.sample_request
-        exception = ValidationError("Invalid data")
-        response, response_data = self._process_exception(request, exception)
+    @patch("logging_app.middleware.log_error", autospec=True)  # Підміняємо log_error
+    def test_standard_django_error_page(self, mock_log_error):
+        request = self.factory.get("/some-url/")
+        exception = ValidationError(["Invalid data"])
 
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response_data["error"], "Invalid data")
+        response = self.middleware.process_exception(request, exception)
 
-    def test_request_exception(self):
-        request = self.sample_request
-        exception = RequestException("API request failed")
-        response, response_data = self._process_exception(request, exception)
+        # ✅ Переконуємося, що log_error викликався
+        mock_log_error.assert_called_once_with(exception, request)
 
-        self.assertEqual(response.status_code, 502)
-        self.assertEqual(response_data["error"], "External API error")
-        self.assertEqual(response_data["details"], "API request failed")
-
-    def test_database_error(self):
-        request = self.sample_request
-        exception = DatabaseError("Database failure")
-        response, response_data = self._process_exception(request, exception)
-
-        self.assertEqual(response.status_code, 500)
-        self.assertEqual(response_data["error"], "Database failure")
-        self.assertEqual(response_data["details"], "Database failure")
-
-    def test_permission_denied(self):
-        request = self.sample_request
-        exception = PermissionDenied("Access denied")
-        response, response_data = self._process_exception(request, exception)
-
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(response_data["error"], "Permission denied")
-
-    def test_key_error(self):
-        request = self.sample_request
-        exception = KeyError("Missing field")
-        response, response_data = self._process_exception(request, exception)
-
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response_data["error"], "Missing required field")
-
-    def test_attribute_error(self):
-        request = self.sample_request
-        exception = AttributeError("Invalid attribute")
-        response, response_data = self._process_exception(request, exception)
-
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response_data["error"], "Invalid attribute usage")
-        self.assertEqual(response_data["details"], "Invalid attribute")
-
-    def test_type_error(self):
-        request = self.sample_request
-        exception = TypeError("Invalid type")
-        response, response_data = self._process_exception(request, exception)
-
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response_data["error"], "Invalid data type")
-        self.assertEqual(response_data["details"], "Invalid type")
-
-    def test_value_error(self):
-        request = self.sample_request
-        exception = ValueError("Invalid value")
-        response, response_data = self._process_exception(request, exception)
-
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response_data["error"], "Invalid value")
-        self.assertEqual(response_data["details"], "Invalid value")
-
-    def test_generic_error(self):
-        request = self.sample_request
-        exception = Exception("Something went wrong")
-        response, response_data = self._process_exception(request, exception)
-
-        self.assertEqual(response.status_code, 500)
-        self.assertEqual(response_data["error"], "Something went wrong")
+        # ✅ Переконуємося, що middleware не змінює відповідь (повертає None)
+        self.assertIsNone(response)
 
 
 class LoggingSignalsTestCase(TestCase):
@@ -121,7 +45,7 @@ class LoggingSignalsTestCase(TestCase):
         self.borrowing = Borrowing.objects.create(
             book=self.book,
             user=self.user,
-            expected_return_date="2025-03-10",
+            expected_return_date=datetime.strptime("2025-03-10", "%Y-%m-%d").date(),
             status="pending",
         )
 
@@ -175,7 +99,7 @@ class LoggingSignalsTestCase(TestCase):
         self.borrowing = Borrowing.objects.create(
             book=self.book,
             user=self.user,
-            expected_return_date="2025-03-10",
+            expected_return_date=datetime.strptime("2025-03-10", "%Y-%m-%d").date(),
             status="pending",
         )
         log_entry = ActionLog.objects.filter(
