@@ -40,7 +40,10 @@ async def cmd_login(message: types.Message, state: FSMContext):
 
         if user:
             await state.update_data(email=user["email"])
-            await message.answer("✅ You are already logged in! Welcome back!")
+            await message.answer(
+                "✅ You are already logged in! Welcome back!\n"
+                "Type /help to see available commands."
+            )
             await state.set_state(AuthState.authenticated)
         else:
             await message.answer("🔑 Please enter your email to log in.")
@@ -85,7 +88,8 @@ async def handle_password(message: types.Message, state: FSMContext):
         )
 
         await message.answer(
-            "✅ You've successfully logged in! You now have access to the books."
+            "✅ You've successfully logged in! You now have access to the library. \n"
+            "Type /help to see available commands."
         )
         await state.set_state(AuthState.authenticated)
     else:

@@ -2,32 +2,35 @@ import asyncio
 import logging
 
 from aiogram import Router, types
-from aiogram.filters import CommandStart
+from aiogram.filters import Command
 from aiogram.types import FSInputFile
 
 from telegram_bot.activity import user_last_activity, user_sessions
-from telegram_bot.services.db import connect_db
 
 router = Router()
 
 
-@router.message(CommandStart())
+@router.message(Command("help"))
 async def start_command(message: types.Message):
-    await message.answer("⏳ Starting. Please wait a while...")
-    await connect_db()
     user_id = message.from_user.id
     user_last_activity[user_id] = asyncio.get_event_loop().time()
     user_sessions[user_id] = (message, None)
 
+    logging.info(f"User {user_id} initialized help action")
     logging.info(f"Updated user activity: {user_id} -> {user_last_activity[user_id]}")
     logging.info(f"Current user activity dictionary: {user_last_activity}")
-    logging.info(f"Created session for user {user_id}: {user_sessions[user_id]}")
 
-    photo_path = "telegram_bot/media/library.jpg"
+    photo_path = "telegram_bot/media/cat-busy.gif"
     photo = FSInputFile(photo_path)
 
     await message.answer_photo(
         photo,
-        caption="Hi! I'm a library bot.📚 Authorize using /login to get started.\n"
-        "Type /help to navigate through the library.",
+        caption="Hello! Here is list of available commands:\n\n"
+        "/start - Start a session\n"
+        "/help - Display help\n"
+        "/login - Login to your library account\n"
+        "/books - Display list of available books\n"
+        "/me - Display information about yourself\n"
+        "/borrowings - Display your borrowings\n"
+        "/stop - Stop session\n",
     )

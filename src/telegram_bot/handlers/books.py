@@ -21,7 +21,7 @@ async def cmd_books(message: types.Message, state: FSMContext):
     user_last_activity[user_id] = asyncio.get_event_loop().time()
     user_sessions[user_id] = (message, None)
 
-    logging.info(f"User {user_id} has started book handling.")
+    logging.info(f"User {user_id} has started 'book' handling.")
     logging.info(f"Updated user activity: {user_id} -> {user_last_activity[user_id]}")
     logging.info(f"Current user activity dictionary: {user_last_activity}")
 
@@ -44,9 +44,11 @@ async def cmd_books(message: types.Message, state: FSMContext):
         for book in books:
             book_list += (
                 f"{book['book_id']} - {book['book_title']} "
-                f"({book['authors']}). Daily fee {book['daily_fee']}$\n"
+                f"({book['authors']}). Daily fee <b>{book['daily_fee']}$</b>\n"
             )
 
-        await message.answer(f"✍️ Here's a list of available books:\n{book_list}")
+        await message.answer(
+            f"✍️ Here's a list of available books:\n{book_list}", parse_mode="HTML"
+        )
     else:
         await message.answer("🗿 No books found.")
