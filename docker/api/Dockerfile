@@ -1,14 +1,14 @@
-FROM python:3.10
-LABEL authors=""
+FROM python:3.10-slim
 
+LABEL authors=""
 
 WORKDIR /app
 
-COPY requirements.txt /app/
+COPY ../../requirements.txt /app/
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /app/
+COPY ../.. /app/
 
 EXPOSE 8000
 
