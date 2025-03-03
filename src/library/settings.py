@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "borrowings",
     "payments",
     "users",
+    "logging_app",
 ]
 
 MIDDLEWARE = [
@@ -64,6 +65,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "logging_app.middleware.ExceptionLoggingMiddleware",
 ]
 
 ROOT_URLCONF = "library.urls"
@@ -102,8 +104,12 @@ DATABASES = {
         "OPTIONS": {
             "sslmode": "require",
         },
+        "TEST": {
+            "MIRROR": "default",
+        },
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -158,36 +164,49 @@ SIMPLE_JWT = {
 
 AUTH_USER_MODEL = "users.User"
 
+
 # Logging
 
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "detailed": {
+            "format": "%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+        },
+    },
     "handlers": {
         "error_file": {
             "level": "ERROR",
             "class": "logging.FileHandler",
             "filename": os.path.join(BASE_DIR, "logs/errors.log"),
+            "formatter": "detailed",
         },
-        # "actions_file": {
-        #     "level": "INFO",
-        #     "class": "logging.FileHandler",
-        #     "filename": os.path.join(BASE_DIR, "logs/actions.log"),
-        # },
+        "console": {
+            "level": "ERROR",
+            "class": "logging.StreamHandler",
+            "formatter": "detailed",
+        },
+        "actions_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/actions.log"),
+        },
     },
     "loggers": {
         "django": {
-            "handlers": ["error_file"],
+            "handlers": ["error_file", "console"],
             "level": "ERROR",
             "propagate": True,
         },
-        # "user_actions": {
-        #     "handlers": ["actions_file"],
-        #     "level": "INFO",
-        #     "propagate": False,
-        # },
+        "user_actions": {
+            "handlers": ["actions_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
+
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")

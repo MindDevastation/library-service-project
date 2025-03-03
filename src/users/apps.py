@@ -7,3 +7,4 @@ class UsersConfig(AppConfig):
 
     def ready(self):
         import borrowings.signals
+        import logging_app.signals
