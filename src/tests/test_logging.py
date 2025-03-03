@@ -22,17 +22,15 @@ class TestExceptionLoggingMiddleware(TestCase):
         self.factory = RequestFactory()
         self.middleware = ExceptionLoggingMiddleware(get_response=lambda request: None)
 
-    @patch("logging_app.middleware.log_error", autospec=True)  # Підміняємо log_error
+    @patch("logging_app.middleware.log_error", autospec=True)
     def test_standard_django_error_page(self, mock_log_error):
         request = self.factory.get("/some-url/")
         exception = ValidationError(["Invalid data"])
 
         response = self.middleware.process_exception(request, exception)
 
-        # ✅ Переконуємося, що log_error викликався
         mock_log_error.assert_called_once_with(exception, request)
 
-        # ✅ Переконуємося, що middleware не змінює відповідь (повертає None)
         self.assertIsNone(response)
 
 
