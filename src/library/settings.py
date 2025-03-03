@@ -192,6 +192,11 @@ LOGGING = {
             "class": "logging.FileHandler",
             "filename": os.path.join(BASE_DIR, "logs/actions.log"),
         },
+        "borrowing_payment_actions_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/borrowing_payment_actions.log"),
+        },
     },
     "loggers": {
         "django": {
@@ -199,6 +204,8 @@ LOGGING = {
             "level": "ERROR",
             "propagate": True,
         },
+        "borrowing_user_actions": {
+            "handlers": ["borrowing_payment_actions_file"],
         "user_actions": {
             "handlers": ["actions_file"],
             "level": "INFO",
