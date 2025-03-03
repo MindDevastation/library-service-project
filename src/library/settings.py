@@ -169,6 +169,11 @@ LOGGING = {
             "class": "logging.FileHandler",
             "filename": os.path.join(BASE_DIR, "logs/errors.log"),
         },
+        "borrowing_actions_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/borrowing_actions.log"),
+        },
         # "actions_file": {
         #     "level": "INFO",
         #     "class": "logging.FileHandler",
@@ -186,6 +191,11 @@ LOGGING = {
         #     "level": "INFO",
         #     "propagate": False,
         # },
+        "borrowing_user_actions": {
+            "handlers": ["borrowing_actions_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
 

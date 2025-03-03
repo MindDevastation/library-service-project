@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from django.db.models.signals import post_save
@@ -10,7 +11,7 @@ from borrowings.models import Borrowing
 from telegram_bot.services.bot import send_borrowing_notification
 from users.models import User
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("borrowing_user_actions")
 
 
 @receiver(post_save, sender=User)
@@ -82,21 +83,38 @@ def send_borrowing_status_update(sender, instance, **kwargs):
             )
 
 
+# Asynchronous wrapper for calling send_borrowing_notification
+async def send_notification_async(instance):
+    try:
+        # Отправка уведомления
+        await send_borrowing_notification(instance)
+        logger.info(
+            f"📚 Borrowing created: '{instance.book.title}' for user {instance.user.email}. Notification sent."
+        )
+    except Exception as e:
+        logger.error(f"❌ Error sending borrowing notification: {str(e)}")
+
+
 @receiver(post_save, sender=Borrowing)
 def send_borrowing_notification_to_user(sender, instance, created, **kwargs):
     if created:
-        try:
-            # Get user's telegram_id
-            telegram_id = instance.user.telegram_id
-            if telegram_id:
-                # Sending a message via Telegram
-                send_borrowing_notification(instance)
-                logger.info(
-                    f"Sent borrowing notification for user {instance.user.email}."
+        # Check for telegram_id
+        telegram_id = instance.user.telegram_id
+        if telegram_id:
+            try:
+                # Create a new event loop if it does not exist in the current thread
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+                # Starting an asynchronous task
+                loop.run_until_complete(send_notification_async(instance))
+            except Exception as e:
+                logger.error(
+                    f"❌ Error in creating event loop or sending notification: {str(e)}"
                 )
-            else:
-                logger.warning(
-                    f"User {instance.user.email} does not have a telegram_id."
-                )
-        except Exception as e:
-            logger.error(f"Error sending borrowing notification: {str(e)}")
+            finally:
+                loop.close()  # Close the event loop after completion
+        else:
+            logger.warning(
+                f"⚠️ Borrowing created: '{instance.book.title}' for user {instance.user.email}, but no telegram_id found."
+            )
