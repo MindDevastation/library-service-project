@@ -35,6 +35,15 @@ class Borrowing(models.Model):
         return validator(self.expected_return_date)
 
     def save(self, *args, **kwargs):
+        """
+        Save the borrowing instance after performing validations.
+
+        This method executes the following actions:
+            1. Validates the expected return date
+            2. If the borrowing's status is 'RETURNED' and the actual return date is not set,
+            sets the actual return date to today's date.
+            3. Calls the parent class's 'save()' method to persist the changes.
+        """
         self.clean_expected_return_date()
         self.full_clean()
         if self.status == self.Status.RETURNED and not self.actual_return_date:

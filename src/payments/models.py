@@ -28,7 +28,6 @@ class Payment(models.Model):
 
     class Currency(models.TextChoices):
         USD = "USD", "US Dollar"
-        EUR = "EUR", "Euro"
 
     status = models.CharField(
         max_length=10, choices=Status.choices, default=Status.PENDING
@@ -113,7 +112,7 @@ class PayPalPayment(Payment):
         try:
             paypalrestsdk.configure(
                 {
-                    "mode": settings.PAYPAL_MODE,  # sandbox или live
+                    "mode": settings.PAYPAL_MODE,
                     "client_id": settings.PAYPAL_CLIENT_ID,
                     "client_secret": settings.PAYPAL_SECRET,
                 }

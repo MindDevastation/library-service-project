@@ -64,7 +64,6 @@ class PayPalPaymentViewSet(viewsets.ModelViewSet):
         return PayPalPaymentListSerializer
 
     def create(self, request, *args, **kwargs):
-        print(request.data)
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             payment = serializer.save()
@@ -89,7 +88,6 @@ class PayPalPaymentViewSet(viewsets.ModelViewSet):
 class StripePaymentSuccessView(APIView):
     def get(self, request):
         session_id = request.query_params.get("session_id")
-        print(session_id)
         if session_id:
             try:
                 stripe.api_key = settings.STRIPE_SECRET_KEY

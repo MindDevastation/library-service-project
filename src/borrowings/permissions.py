@@ -1,5 +1,5 @@
 from rest_framework.permissions import BasePermission
-from payments.models import Payment
+from payments.models import PayPalPayment, StripePayment
 
 
 class HasNoPendingPayments(BasePermission):
@@ -10,9 +10,11 @@ class HasNoPendingPayments(BasePermission):
             user = request.user
             if not user or not user.is_authenticated:
                 return False
-            return not Payment.objects.filter(
+            return not PayPalPayment.objects.filter(
                 borrowing__user=user, status="PENDING"
-            ).exists()
+            ).exists() and not StripePayment.objects.filter(
+                borrowing__user=user, status="PENDING"
+            )
         return True
 
 
