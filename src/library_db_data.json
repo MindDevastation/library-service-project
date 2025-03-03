@@ -1,0 +1,384 @@
+[
+    {
+        "model": "users.author",
+        "pk": 1,
+        "fields": {
+            "name": "Haruki Murakami"
+        }
+    },
+    {
+        "model": "users.author",
+        "pk": 2,
+        "fields": {
+            "name": "J.K. Rowling"
+        }
+    },
+    {
+        "model": "users.author",
+        "pk": 3,
+        "fields": {
+            "name": "George Orwell"
+        }
+    },
+    {
+        "model": "users.author",
+        "pk": 4,
+        "fields": {
+            "name": "Leo Tolstoy"
+        }
+    },
+    {
+        "model": "users.author",
+        "pk": 5,
+        "fields": {
+            "name": "Jane Austen"
+        }
+    },
+    {
+        "model": "users.author",
+        "pk": 6,
+        "fields": {
+            "name": "Mark Twain"
+        }
+    },
+    {
+        "model": "users.author",
+        "pk": 7,
+        "fields": {
+            "name": "Fyodor Dostoevsky"
+        }
+    },
+    {
+        "model": "users.author",
+        "pk": 8,
+        "fields": {
+            "name": "Gabriel Garcia Marquez"
+        }
+    },
+    {
+        "model": "users.author",
+        "pk": 9,
+        "fields": {
+            "name": "Stephen King"
+        }
+    },
+    {
+        "model": "users.author",
+        "pk": 10,
+        "fields": {
+            "name": "Ernest Hemingway"
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 1,
+        "fields": {
+            "title": "Norwegian Wood",
+            "pages": 296,
+            "cover": "HARD",
+            "inventory": 5,
+            "daily_fee": "1.50",
+            "quantity": 2,
+            "authors": [1]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 2,
+        "fields": {
+            "title": "Kafka on the Shore",
+            "pages": 505,
+            "cover": "SOFT",
+            "inventory": 3,
+            "daily_fee": "2.00",
+            "quantity": 1,
+            "authors": [1]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 3,
+        "fields": {
+            "title": "Harry Potter and the Sorcerer's Stone",
+            "pages": 309,
+            "cover": "HARD",
+            "inventory": 10,
+            "daily_fee": "1.75",
+            "quantity": 5,
+            "authors": [2]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 4,
+        "fields": {
+            "title": "Harry Potter and the Chamber of Secrets",
+            "pages": 341,
+            "cover": "SOFT",
+            "inventory": 8,
+            "daily_fee": "1.80",
+            "quantity": 3,
+            "authors": [2]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 5,
+        "fields": {
+            "title": "1984",
+            "pages": 328,
+            "cover": "HARD",
+            "inventory": 4,
+            "daily_fee": "1.50",
+            "quantity": 2,
+            "authors": [3]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 6,
+        "fields": {
+            "title": "Animal Farm",
+            "pages": 112,
+            "cover": "SOFT",
+            "inventory": 6,
+            "daily_fee": "1.20",
+            "quantity": 3,
+            "authors": [3]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 7,
+        "fields": {
+            "title": "War and Peace",
+            "pages": 1225,
+            "cover": "HARD",
+            "inventory": 2,
+            "daily_fee": "3.00",
+            "quantity": 1,
+            "authors": [4]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 8,
+        "fields": {
+            "title": "Anna Karenina",
+            "pages": 864,
+            "cover": "SOFT",
+            "inventory": 3,
+            "daily_fee": "2.50",
+            "quantity": 2,
+            "authors": [4]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 9,
+        "fields": {
+            "title": "Pride and Prejudice",
+            "pages": 432,
+            "cover": "HARD",
+            "inventory": 7,
+            "daily_fee": "1.75",
+            "quantity": 4,
+            "authors": [5]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 10,
+        "fields": {
+            "title": "Emma",
+            "pages": 474,
+            "cover": "SOFT",
+            "inventory": 5,
+            "daily_fee": "1.60",
+            "quantity": 3,
+            "authors": [5]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 11,
+        "fields": {
+            "title": "Adventures of Huckleberry Finn",
+            "pages": 366,
+            "cover": "HARD",
+            "inventory": 4,
+            "daily_fee": "1.40",
+            "quantity": 2,
+            "authors": [6]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 12,
+        "fields": {
+            "title": "The Brothers Karamazov",
+            "pages": 796,
+            "cover": "SOFT",
+            "inventory": 3,
+            "daily_fee": "2.20",
+            "quantity": 1,
+            "authors": [7]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 13,
+        "fields": {
+            "title": "Crime and Punishment",
+            "pages": 671,
+            "cover": "HARD",
+            "inventory": 6,
+            "daily_fee": "2.00",
+            "quantity": 3,
+            "authors": [7]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 14,
+        "fields": {
+            "title": "One Hundred Years of Solitude",
+            "pages": 417,
+            "cover": "SOFT",
+            "inventory": 5,
+            "daily_fee": "1.85",
+            "quantity": 2,
+            "authors": [8]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 15,
+        "fields": {
+            "title": "Love in the Time of Cholera",
+            "pages": 348,
+            "cover": "HARD",
+            "inventory": 4,
+            "daily_fee": "1.90",
+            "quantity": 2,
+            "authors": [8]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 16,
+        "fields": {
+            "title": "The Shining",
+            "pages": 447,
+            "cover": "SOFT",
+            "inventory": 6,
+            "daily_fee": "1.70",
+            "quantity": 3,
+            "authors": [9]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 17,
+        "fields": {
+            "title": "It",
+            "pages": 1138,
+            "cover": "HARD",
+            "inventory": 3,
+            "daily_fee": "2.50",
+            "quantity": 2,
+            "authors": [9]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 18,
+        "fields": {
+            "title": "The Old Man and the Sea",
+            "pages": 127,
+            "cover": "SOFT",
+            "inventory": 7,
+            "daily_fee": "1.20",
+            "quantity": 4,
+            "authors": [10]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 19,
+        "fields": {
+            "title": "For Whom the Bell Tolls",
+            "pages": 480,
+            "cover": "HARD",
+            "inventory": 5,
+            "daily_fee": "1.80",
+            "quantity": 3,
+            "authors": [10]
+        }
+    },
+    {
+        "model": "books.book",
+        "pk": 20,
+        "fields": {
+            "title": "The Sun Also Rises",
+            "pages": 251,
+            "cover": "SOFT",
+            "inventory": 6,
+            "daily_fee": "1.50",
+            "quantity": 3,
+            "authors": [10]
+        }
+    },
+    {
+        "model": "users.user",
+        "pk": 1,
+        "fields": {
+            "email": "telegram_bot@test.com",
+            "first_name": "Telegram",
+            "last_name": "Bot",
+            "is_staff": false,
+            "is_superuser": false,
+            "password": "pbkdf2_sha256$600000$Z7VbLXS3DkKWWnCKIpFpov$u+gdCIcxXRpYs21K409K8ohIebcaBkwPuFyknWQ3h6c=",
+            "telegram_id": null
+        }
+    },
+    {
+        "model": "users.user",
+        "pk": 2,
+        "fields": {
+            "email": "common_user@test.com",
+            "first_name": "Common",
+            "last_name": "User",
+            "is_staff": false,
+            "is_superuser": false,
+            "password": "pbkdf2_sha256$600000$Z7VbLXS3DkKWWnCKIpFpov$u+gdCIcxXRpYs21K409K8ohIebcaBkwPuFyknWQ3h6c=",
+            "telegram_id": null
+        }
+    },
+    {
+        "model": "users.user",
+        "pk": 3,
+        "fields": {
+            "email": "admin_user@test.com",
+            "first_name": "Admin",
+            "last_name": "User",
+            "is_staff": true,
+            "is_superuser": true,
+            "password": "pbkdf2_sha256$600000$Z7VbLXS3DkKWWnCKIpFpov$u+gdCIcxXRpYs21K409K8ohIebcaBkwPuFyknWQ3h6c=",
+            "telegram_id": null
+        }
+    },
+    {
+        "model": "users.user",
+        "pk": 4,
+        "fields": {
+            "email": "moder_user@test.com",
+            "first_name": "Moder",
+            "last_name": "User",
+            "is_staff": true,
+            "is_superuser": false,
+            "password": "pbkdf2_sha256$600000$Z7VbLXS3DkKWWnCKIpFpov$u+gdCIcxXRpYs21K409K8ohIebcaBkwPuFyknWQ3h6c=",
+            "telegram_id": null
+        }
+    }
+]
