@@ -28,14 +28,12 @@ class Book(models.Model):
     daily_fee = models.DecimalField(
         max_digits=4, decimal_places=2, validators=[MinValueValidator(0)]
     )
+    quantity = models.PositiveIntegerField(default=0)
+
 
     def __str__(self):
         return self.title
 
-    @property
-    def quantity(self):
-        borrowed_count = self.borrowings.filter(actual_return_date__isnull=True).count()
-        return self.inventory - borrowed_count
 
     class Meta:
         verbose_name = "Book"
