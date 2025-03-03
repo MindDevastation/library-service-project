@@ -16,7 +16,9 @@ async def get_books():
     query = """
     SELECT 
         book.title AS book_title,
-        STRING_AGG(author.name, ', ') AS authors
+        STRING_AGG(author.name, ', ') AS authors,
+        book.id AS book_id,
+        book.daily_fee
     FROM 
         books_book book
     JOIN 
@@ -24,7 +26,7 @@ async def get_books():
     JOIN 
         books_author author ON ba.author_id = author.id
     GROUP BY 
-        book.title;
+        book.id;
     """
     rows = await database.fetch_all(query)
     return rows

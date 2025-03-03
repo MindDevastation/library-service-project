@@ -28,7 +28,7 @@ async def cmd_books(message: types.Message, state: FSMContext):
 
         if not email:
             await message.answer(
-                "You are not authorized. Please log in using the /login command."
+                "⚠️ You are not authorized. Please log in using the /login command."
             )
             return
 
@@ -39,7 +39,7 @@ async def cmd_books(message: types.Message, state: FSMContext):
             # Form a line with book titles and their authors
             book_list = ""
             for book in books:
-                book_list += f"{book['book_title']} - {book['authors']}\n"
+                book_list += f"{book['book_id']} - {book['book_title']} ({book['authors']}). Daily fee {book['daily_fee']}$\n"
 
             await message.answer(f"Here's a list of available books:\n{book_list}")
         else:
