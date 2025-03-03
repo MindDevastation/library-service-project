@@ -53,3 +53,26 @@ class BorrowingUniqueValidator:
         ).exists():
             raise self.error_class(self.message)
         return book
+
+
+class ActiveBorrowingsLimitValidator:
+    """
+    Validator that checks if the user has exceeded the maximum number of active borrowings.
+    Active borrowings are those with status 'pending' or 'overdue'.
+    """
+
+    def __init__(self, max_active=5, error_class=SerializerValidationError):
+        self.max_active = max_active
+        self.error_class = error_class
+
+    def __call__(self, user):
+        from borrowings.models import Borrowing
+
+        active_count = Borrowing.objects.filter(
+            user=user, status__in=[Borrowing.Status.PENDING, Borrowing.Status.OVERDUE]
+        ).count()
+        if active_count >= self.max_active:
+            raise self.error_class(
+                "You already have the maximum number of active borrowings."
+            )
+        return user
