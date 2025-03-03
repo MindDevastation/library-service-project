@@ -14,3 +14,11 @@ class HasNoPendingPayments(BasePermission):
                 borrowing__user=user, status="PENDING"
             ).exists()
         return True
+
+
+class IsBorrowingOwnerOrAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_staff or request.user == obj.user
