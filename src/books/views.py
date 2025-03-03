@@ -32,6 +32,17 @@ class BookListCreateView(generics.ListCreateAPIView):
             queryset = queryset.filter(authors=author_id)
         return queryset
 
+    def perform_create(self, serializer):
+        authors_data = self.request.data.get("authors", [])
+        authors = []
+
+        for author_name in authors_data:
+            author, created = Author.objects.get_or_create(name=author_name)
+            authors.append(author)
+
+        book = serializer.save()
+        book.authors.set(authors)
+
 
 class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BookSerializer
@@ -40,4 +51,3 @@ class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         queryset = Book.objects.prefetch_related("authors")
         return queryset
-
