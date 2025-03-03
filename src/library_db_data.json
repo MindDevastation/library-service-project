@@ -1,69 +1,69 @@
 [
     {
-        "model": "users.author",
+        "model": "books.author",
         "pk": 1,
         "fields": {
             "name": "Haruki Murakami"
         }
     },
     {
-        "model": "users.author",
+        "model": "books.author",
         "pk": 2,
         "fields": {
             "name": "J.K. Rowling"
         }
     },
     {
-        "model": "users.author",
+        "model": "books.author",
         "pk": 3,
         "fields": {
             "name": "George Orwell"
         }
     },
     {
-        "model": "users.author",
+        "model": "books.author",
         "pk": 4,
         "fields": {
             "name": "Leo Tolstoy"
         }
     },
     {
-        "model": "users.author",
+        "model": "books.author",
         "pk": 5,
         "fields": {
             "name": "Jane Austen"
         }
     },
     {
-        "model": "users.author",
+        "model": "books.author",
         "pk": 6,
         "fields": {
             "name": "Mark Twain"
         }
     },
     {
-        "model": "users.author",
+        "model": "books.author",
         "pk": 7,
         "fields": {
             "name": "Fyodor Dostoevsky"
         }
     },
     {
-        "model": "users.author",
+        "model": "books.author",
         "pk": 8,
         "fields": {
             "name": "Gabriel Garcia Marquez"
         }
     },
     {
-        "model": "users.author",
+        "model": "books.author",
         "pk": 9,
         "fields": {
             "name": "Stephen King"
         }
     },
     {
-        "model": "users.author",
+        "model": "books.author",
         "pk": 10,
         "fields": {
             "name": "Ernest Hemingway"
