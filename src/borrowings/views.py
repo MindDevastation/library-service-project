@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.serializers import Serializer
 
-# from borrowings.permissions import IsBorrowingOwnerOrAdmin
+from borrowings.schema import borrowings_schema_view
+from borrowings.permissions import IsBorrowingOwnerOrAdmin, HasNoPendingPayments
 from borrowings.models import Borrowing
 from borrowings.serializers import (
     BorrowingDetailSerializer,
@@ -13,14 +14,22 @@ from borrowings.serializers import (
 )
 
 
+@borrowings_schema_view
 class BorrowingViewSet(viewsets.ModelViewSet):
     serializer_class = BorrowingListSerializer
     queryset = Borrowing.objects.select_related("user", "book").prefetch_related(
         "book__authors"
     )
-    # permission_classes = [IsBorrowingOwnerOrAdmin]
 
     http_method_names = ["get", "post"]
+
+    def get_permissions(self):
+        permission_classes = [IsBorrowingOwnerOrAdmin()]
+
+        if self.action == "create":
+            permission_classes = [IsBorrowingOwnerOrAdmin(), HasNoPendingPayments()]
+
+        return permission_classes
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -32,6 +41,10 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         return BorrowingListSerializer
 
     def get_queryset(self):
+        """
+        Retrieve a filtered queryset of borrowing records
+        based on query parameters and user permissions.
+        """
         queryset = self.queryset
         user = self.request.user
         is_active = self.request.query_params.get("is_active")
@@ -56,6 +69,12 @@ class BorrowingViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="return")
     def return_book(self, request, pk=None):
+        """
+        This action updates the borrowing record by setting its status to 'RETURNED'.
+        If the borrowing is already returned, it returns a 400 Bad Request response with an appropriate message.
+        Otherwise, it increments the associated book's inventory by one and saves both the borrowing and the book,
+        then returns a success response.
+        """
         with transaction.atomic():
             borrowing = self.get_object()
 
