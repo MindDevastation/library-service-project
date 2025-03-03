@@ -8,6 +8,7 @@ from borrowings.validators import (
     BookAvailabilityValidator,
     BorrowingUniqueValidator,
     ExpectedReturnDateValidator,
+    ActiveBorrowingsLimitValidator,
 )
 
 
@@ -75,6 +76,8 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
         book = data.get("book")
         validator = BorrowingUniqueValidator(user=user)
         validator(book)
+        validator = ActiveBorrowingsLimitValidator()
+        validator(user=user)
         return data
 
     def create(self, validated_data):
