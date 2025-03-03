@@ -8,6 +8,7 @@ from aiogram import types
 from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from telegram_bot.activity import user_last_activity, user_sessions
@@ -20,7 +21,7 @@ django.setup()
 from aiogram import Bot, Dispatcher, Router
 
 from config import BOT_TOKEN
-from handlers import start, token, stop, auth, books
+from handlers import start, stop, auth, books, borrowing, me, help
 
 logging.basicConfig(level=logging.INFO)
 
@@ -31,10 +32,12 @@ router = Router()
 
 # Connecting handlers
 dp.include_router(start.router)
-dp.include_router(token.router)
 dp.include_router(stop.router)
 dp.include_router(auth.router)
 dp.include_router(books.router)
+dp.include_router(borrowing.router)
+dp.include_router(me.router)
+dp.include_router(help.router)
 
 
 # Function for terminating the user's session

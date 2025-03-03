@@ -12,7 +12,8 @@ from borrowings.models import Borrowing
 from borrowings.serializers import (
     BorrowingDetailSerializer,
     BorrowingListSerializer,
-    BorrowingCreateSerializer, PaymentChoiceSerializer,
+    BorrowingCreateSerializer,
+    PaymentChoiceSerializer,
 )
 from payments.helpers import create_stripe_payment, create_paypal_payment
 
@@ -96,8 +97,8 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             book.inventory += 1
             book.save()
 
-            provider = serializer.validated_data['provider']
-            currency = serializer.validated_data['currency']
+            provider = serializer.validated_data["provider"]
+            currency = serializer.validated_data["currency"]
             daily_fee = borrowing.book.daily_fee
             day_pass = (borrowing.actual_return_date - borrowing.borrow_date).days
             if day_pass == 0:
@@ -106,7 +107,9 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             money_to_pay = daily_fee * Decimal(day_pass)
             payment_type = "PAYMENT"
             fine_multiplier = Decimal("2")
-            days_of_overdue = Decimal((borrowing.actual_return_date - borrowing.expected_return_date).days)
+            days_of_overdue = Decimal(
+                (borrowing.actual_return_date - borrowing.expected_return_date).days
+            )
             fine_amount = days_of_overdue * daily_fee * fine_multiplier
 
             if borrowing.actual_return_date > borrowing.expected_return_date:
@@ -115,30 +118,24 @@ class BorrowingViewSet(viewsets.ModelViewSet):
 
             if provider == "stripe":
                 stripe_payment, session = create_stripe_payment(
-                    borrowing,
-                    money_to_pay,
-                    currency,
-                    payment_type
+                    borrowing, money_to_pay, currency, payment_type
                 )
                 return Response(
                     {
                         "message": "Borrowing returned successfully",
-                        "go_to_pay": session.url
+                        "go_to_pay": session.url,
                     },
                     status=status.HTTP_200_OK,
                 )
 
             elif provider == "paypal":
                 paypal_payment, approval_url = create_paypal_payment(
-                    borrowing,
-                    money_to_pay,
-                    currency,
-                    payment_type
+                    borrowing, money_to_pay, currency, payment_type
                 )
                 return Response(
                     {
                         "message": "Borrowing returned successfully",
-                        "go_to_pay": approval_url
+                        "go_to_pay": approval_url,
                     },
                     status=status.HTTP_200_OK,
                 )
