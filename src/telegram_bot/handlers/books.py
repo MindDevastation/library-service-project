@@ -4,26 +4,27 @@ from aiogram import types
 from aiogram.filters import Command
 from aiogram import Router
 from aiogram.fsm.context import FSMContext
-from telegram_bot.services.books import get_books  # Функция получения списка книг
+from telegram_bot.services.books import (
+    get_books,
+)  # Function for obtaining the list of books
 from telegram_bot.services.db import (
     connect_db,
     disconnect_db,
-)  # Функции для подключения и отключения базы данных
+)  # Functions for connecting and disconnecting the database
 
 router = Router()
 
 
 @router.message(Command("books"))
 async def cmd_books(message: types.Message, state: FSMContext):
-    # Подключаемся к базе данных
+    await message.answer("⏳ Waiting for books...")
+    # Connecting to the database
     await connect_db()
 
     try:
-        # Проверяем, залогинен ли пользователь
+        # Check if the user is logged in
         user_data = await state.get_data()
-        email = user_data.get(
-            "email"
-        )  # Предполагаем, что email сохраняется после логина
+        email = user_data.get("email")  # Assume that email is stored after login
 
         if not email:
             await message.answer(
@@ -31,11 +32,11 @@ async def cmd_books(message: types.Message, state: FSMContext):
             )
             return
 
-        # Получаем список книг
+        # Get a list of books
         books = await get_books()
 
         if books:
-            # Формируем строку с названиями книг и их авторами
+            # Form a line with book titles and their authors
             book_list = ""
             for book in books:
                 book_list += f"{book['book_title']} - {book['authors']}\n"

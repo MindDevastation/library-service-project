@@ -1,18 +1,20 @@
-# telegram_bot/services/db.py
+import os
 
 import databases
 
-DATABASE_URL = "postgresql://library_owner:npg_TDW9uodJm3jI@ep-jolly-hat-a9vxn1fq-pooler.gwc.azure.neon.tech/library?sslmode=require"
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
-# Создаем объект для подключения к базе данных
+# Create an object to connect to the database
 database = databases.Database(DATABASE_URL)
 
 
-# Функция подключения
+# Connection function
 async def connect_db():
-    await database.connect()
+    if not database.is_connected:
+        await database.connect()
 
 
-# Функция отключения
+# Switch-off function
 async def disconnect_db():
-    await database.disconnect()
+    if database.is_connected:
+        await database.disconnect()
