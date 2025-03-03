@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
@@ -5,7 +7,10 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 from borrowings.models import Borrowing
+from telegram_bot.services.bot import send_borrowing_notification
 from users.models import User
+
+logger = logging.getLogger(__name__)
 
 
 @receiver(post_save, sender=User)
@@ -75,3 +80,23 @@ def send_borrowing_status_update(sender, instance, **kwargs):
                 html_message=html_message,
                 fail_silently=True,
             )
+
+
+@receiver(post_save, sender=Borrowing)
+def send_borrowing_notification_to_user(sender, instance, created, **kwargs):
+    if created:
+        try:
+            # Get user's telegram_id
+            telegram_id = instance.user.telegram_id
+            if telegram_id:
+                # Sending a message via Telegram
+                send_borrowing_notification(instance)
+                logger.info(
+                    f"Sent borrowing notification for user {instance.user.email}."
+                )
+            else:
+                logger.warning(
+                    f"User {instance.user.email} does not have a telegram_id."
+                )
+        except Exception as e:
+            logger.error(f"Error sending borrowing notification: {str(e)}")

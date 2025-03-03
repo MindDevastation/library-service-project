@@ -70,7 +70,7 @@ async def check_inactivity():
                     f"User {user_id} last activity: {last_activity}. "
                     f"Diff from current time: {current_time - last_activity}"
                 )
-                if current_time - last_activity > 60:  # 60 seconds = 1 minute
+                if current_time - last_activity > 300:  # 300 seconds = 5 minute
                     session = user_sessions.get(user_id)
                     logging.info(f"Session: {session} for User {user_id}")
 
