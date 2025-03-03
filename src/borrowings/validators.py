@@ -4,6 +4,10 @@ from rest_framework.serializers import ValidationError as SerializerValidationEr
 
 
 class BookAvailabilityValidator:
+    """
+    Validator that checks if a book is available for borrowing.
+    Raises a ValidationError if the book's inventory is zero or less.
+    """
 
     message = "Book is out of stock"
 
@@ -17,6 +21,11 @@ class BookAvailabilityValidator:
 
 
 class ExpectedReturnDateValidator:
+    """
+    Validator that ensures the expected return date is within an acceptable range.
+    The expected return date must not be in the past and must not exceed a specified
+    maximum number of days into the future.
+    """
 
     max_days = 30
     message_if_before_borrow = "Expected return date cannot be before borrow date"
@@ -36,6 +45,11 @@ class ExpectedReturnDateValidator:
 
 
 class BorrowingUniqueValidator:
+    """
+    Validator that ensures a user does not have an active borrowing for the same book.
+    Checks that the user does not already have a borrowing in either 'PENDING' or 'OVERDUE' status
+    for the given book.
+    """
 
     message = "You already have an active borrowing for this book"
 

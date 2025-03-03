@@ -41,6 +41,10 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         return BorrowingListSerializer
 
     def get_queryset(self):
+        """
+        Retrieve a filtered queryset of borrowing records
+        based on query parameters and user permissions.
+        """
         queryset = self.queryset
         user = self.request.user
         is_active = self.request.query_params.get("is_active")
@@ -65,6 +69,12 @@ class BorrowingViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="return")
     def return_book(self, request, pk=None):
+        """
+        This action updates the borrowing record by setting its status to 'RETURNED'.
+        If the borrowing is already returned, it returns a 400 Bad Request response with an appropriate message.
+        Otherwise, it increments the associated book's inventory by one and saves both the borrowing and the book,
+        then returns a success response.
+        """
         with transaction.atomic():
             borrowing = self.get_object()
 
