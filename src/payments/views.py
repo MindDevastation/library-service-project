@@ -17,10 +17,15 @@ from payments.serializers import (
 
 class PaymentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     def list(self, request, *args, **kwargs):
-        stripe_payments = StripePayment.objects.all()
-        stripe_serializer = StripePaymentListSerializer(stripe_payments, many=True)
+        user = self.request.user
+        if not user.is_staff:
+            stripe_payments = StripePayment.objects.filter(borrowing__user_id=user.id)
+            paypal_payments = PayPalPayment.objects.filter(borrowing__user_id=user.id)
+        else:
+            stripe_payments = StripePayment.objects.all()
+            paypal_payments = PayPalPayment.objects.all()
 
-        paypal_payments = PayPalPayment.objects.all()
+        stripe_serializer = StripePaymentListSerializer(stripe_payments, many=True)
         paypal_serializer = PayPalPaymentListSerializer(paypal_payments, many=True)
 
         return Response(
@@ -34,6 +39,15 @@ class PaymentViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 class StripePaymentViewSet(viewsets.ModelViewSet):
     queryset = StripePayment.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = self.queryset
+
+        if not user.is_staff:
+            queryset = StripePayment.objects.filter(borrowing__user_id=user.id)
+
+        return queryset
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -57,6 +71,15 @@ class StripePaymentViewSet(viewsets.ModelViewSet):
 
 class PayPalPaymentViewSet(viewsets.ModelViewSet):
     queryset = PayPalPayment.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = self.queryset
+
+        if not user.is_staff:
+            queryset = PayPalPayment.objects.filter(borrowing__user_id=user.id)
+
+        return queryset
 
     def get_serializer_class(self):
         if self.action == "create":
