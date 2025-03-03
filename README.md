@@ -53,6 +53,18 @@ library-service-project/
 │   ├── logs/          # System Logs
 │   ├── templates/     # Email templates (e.g., return reminders)
 │   ├── library_db_data.json  # Initial data (optional)
+│   ├── telegram_bot/
+│   │   ├── __init__.py
+│   │   ├── config.py  # Configuration (bot token, API URL)
+│   │   ├── main.py  # Starting the bot
+│   │   ├── handlers/  # Command handlers
+│   │   │   ├── __init__.py
+│   │   │   ├── start.py  # Процессор /start
+│   │   │   ├── auth.py  # User authorization
+│   │   ├── middlewares/  # Middleware (if needed)
+│   │   ├── keyboards/  # Keyboards
+│   │   ├── services/  # API requests
+│   │   └── utils/  # Additional Functions
 │   └── manage.py
 ├── requirements.txt   # Dependencies
 ├── Dockerfile         # Containerization
