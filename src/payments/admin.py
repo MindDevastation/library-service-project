@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from payments.models import StripePayment, PayPalPayment
+
+admin.site.register(StripePayment)
+admin.site.register(PayPalPayment)
