@@ -1,14 +1,12 @@
-from asgiref.sync import sync_to_async
-from users.models import User
+import aiohttp
 
 
-@sync_to_async
-def login_user(email: str, password: str) -> bool:
-    try:
-        user = User.objects.get(email=email)
-    except User.DoesNotExist:
-        return False
+async def login_user(email: str, password: str) -> bool:
+    url = "http://127.0.0.1:8000/api/users/telegram-login/"
+    data = {"email": email, "password": password}
 
-    if user.check_password(password):
-        return True
-    return False
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json=data) as response:
+            if response.status == 200:
+                return True
+            return False

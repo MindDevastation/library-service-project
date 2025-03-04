@@ -111,7 +111,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -214,9 +213,13 @@ LOGGING = {
                 "propagate": False,
             },
         },
+        "user_actions": {
+            "handlers": ["actions_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
-
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
@@ -236,10 +239,9 @@ EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
 EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
 DEFAULT_FROM_EMAIL = os.environ["DEFAULT_FROM_EMAIL"]
 
-
 # Celery Configuration Options
-CELERY_BROKER_URL = "redis://localhost:6379"
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_BROKER_URL = "redis://redis:6379"
+CELERY_RESULT_BACKEND = "redis://redis:6379"
 CELERY_TIMEZONE = "Europe/Kyiv"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60

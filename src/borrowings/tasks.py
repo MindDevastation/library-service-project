@@ -1,3 +1,5 @@
+import os
+
 from celery import shared_task
 from django.utils.timezone import now
 from django.core.mail import send_mail
@@ -30,29 +32,13 @@ def check_overdue_borrowings():
         send_telegram_notification(message)
 
 
-def send_telegram_notification(message):
+def send_telegram_notification(message, telegram_id):
     """
     Sends a message to a Telegram chat.
-    Replace 'YOUR_TELEGRAM_BOT_TOKEN' and 'YOUR_CHAT_ID' with actual values.
     """
-    bot_token = "YOUR_TELEGRAM_BOT_TOKEN"
-    chat_id = "YOUR_CHAT_ID"
+    bot_token = os.getenv("BOT_TOKEN")
 
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-    payload = {"chat_id": chat_id, "text": message}
+    payload = {"chat_id": telegram_id, "text": message}
     response = requests.post(url, data=payload)
     return response.json()
-
-
-@shared_task
-def check_and_update_overdue_borrowings():
-
-    today = now().date()
-
-    borrowings_to_update = Borrowing.objects.filter(
-        expected_return_date__lt=today,
-        actual_return_date__isnull=True,
-        status=Borrowing.Status.PENDING,
-    )
-
-    borrowings_to_update.update(status=Borrowing.Status.OVERDUE)

@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 
-from users.views import CreateUserView, ManageUserView
+from users.views import CreateUserView, ManageUserView, login_telegram_checkout
 
 app_name = "user"
 
@@ -19,4 +19,5 @@ urlpatterns = [
         ManageUserView.as_view(),
         name="manage",
     ),
+    path("telegram-login/", login_telegram_checkout, name="telegram-login"),
 ]

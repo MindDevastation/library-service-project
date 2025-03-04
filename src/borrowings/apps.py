@@ -1,6 +1,3 @@
-import os
-import sys
-
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
 from django.utils.timezone import now
@@ -21,7 +18,6 @@ class BorrowingsConfig(AppConfig):
     def create_periodic_task(self, **kwargs):
         """Creates or retrieves a periodic task for checking overdue borrowings."""
         from django_celery_beat.models import PeriodicTask, IntervalSchedule
-        from borrowings.tasks import check_and_update_overdue_borrowings
 
         # Create or get an interval schedule that runs every day
         schedule, created = IntervalSchedule.objects.get_or_create(
