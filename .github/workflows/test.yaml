@@ -45,6 +45,7 @@ jobs:
           echo "POSTGRES_PASSWORD=password" >> $GITHUB_ENV
           echo "POSTGRES_HOST=localhost" >> $GITHUB_ENV
           echo "POSTGRES_DB_PORT=5432" >> $GITHUB_ENV
+          echo "EMAIL_BACKEND=django.core.mail.backends.locmem.EmailBackend" >> $GITHUB_ENV
 
       - name: Run flake8
         run: flake8 .
