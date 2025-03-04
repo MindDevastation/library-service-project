@@ -79,8 +79,8 @@ async def handle_password(message: types.Message, state: FSMContext):
     if login_user(email, password):
         # After successful login, we immediately write telegram_id
         update_query = """
-                            UPDATE users_user 
-                            SET telegram_id = :telegram_id 
+                            UPDATE users_user
+                            SET telegram_id = :telegram_id
                             WHERE email = :email
                             """
         await database.execute(

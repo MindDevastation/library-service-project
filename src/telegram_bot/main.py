@@ -92,7 +92,7 @@ async def on_start():
     asyncio.create_task(
         check_inactivity()
     )  # Run inactivity check loop as a background task
-    logging.info(f"Inactivity check task created.")
+    logging.info("Inactivity check task created.")
 
 
 async def on_shutdown():
