@@ -1,3 +1,6 @@
+import os
+import sys
+
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
 from django.utils.timezone import now
@@ -28,7 +31,7 @@ class BorrowingsConfig(AppConfig):
         # Create or get a periodic task that runs the check_and_update_overdue_borrowings task daily
         PeriodicTask.objects.get_or_create(
             name="Check and update overdue borrowings",
-            task="borrowings.tasks.check_and_update_overdue_borrowings",
+            task="borrowings.tasks.check_overdue_borrowings",
             interval=schedule,
             start_time=now(),
         )
