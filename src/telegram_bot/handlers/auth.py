@@ -25,12 +25,13 @@ class AuthState(StatesGroup):
 async def cmd_login(message: types.Message, state: FSMContext):
     telegram_id = message.from_user.id
     await message.answer("⏳ Authorizing...")
-    user_id = message.from_user.id
-    user_last_activity[user_id] = asyncio.get_event_loop().time()
-    user_sessions[user_id] = (message, None)
+    user_last_activity[telegram_id] = asyncio.get_event_loop().time()
+    user_sessions[telegram_id] = (message, None)
 
-    logging.info(f"User {user_id} started login")
-    logging.info(f"Updated user activity: {user_id} -> {user_last_activity[user_id]}")
+    logging.info(f"User {telegram_id} started login")
+    logging.info(
+        f"Updated user activity: {telegram_id} -> {user_last_activity[telegram_id]}"
+    )
     logging.info(f"Current user activity dictionary: {user_last_activity}")
 
     if database.is_connected:
@@ -60,12 +61,14 @@ async def handle_email(message: types.Message, state: FSMContext):
     await state.update_data(email=email)
     await message.answer("🔒 Now enter your password.")
     await state.set_state(AuthState.waiting_for_password)
-    user_id = message.from_user.id
-    user_last_activity[user_id] = asyncio.get_event_loop().time()
-    user_sessions[user_id] = (message, None)
+    telegram_id = message.from_user.id
+    user_last_activity[telegram_id] = asyncio.get_event_loop().time()
+    user_sessions[telegram_id] = (message, None)
 
-    logging.info(f"User {user_id} entered email: {email}")
-    logging.info(f"Updated user activity: {user_id} -> {user_last_activity[user_id]}")
+    logging.info(f"User {telegram_id} entered email: {email}")
+    logging.info(
+        f"Updated user activity: {telegram_id} -> {user_last_activity[telegram_id]}"
+    )
     logging.info(f"Current user activity dictionary: {user_last_activity}")
 
 
@@ -95,11 +98,13 @@ async def handle_password(message: types.Message, state: FSMContext):
     else:
         await message.answer("❌ Invalid email or password. Try again.")
         await state.finish()
-    user_id = message.from_user.id
-    user_last_activity[user_id] = asyncio.get_event_loop().time()
-    user_sessions[user_id] = (message, None)
+    telegram_id = message.from_user.id
+    user_last_activity[telegram_id] = asyncio.get_event_loop().time()
+    user_sessions[telegram_id] = (message, None)
 
-    logging.info(f"User {user_id} entered password: {password}")
-    logging.info(f"User created. Telegram ID: {telegram_id} -> {user_id}")
-    logging.info(f"Updated user activity: {user_id} -> {user_last_activity[user_id]}")
+    logging.info(f"User {telegram_id} entered password: {password}")
+    logging.info(f"User created. Telegram ID: {telegram_id} -> {telegram_id}")
+    logging.info(
+        f"Updated user activity: {telegram_id} -> {user_last_activity[telegram_id]}"
+    )
     logging.info(f"Current user activity dictionary: {user_last_activity}")

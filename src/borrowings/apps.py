@@ -28,10 +28,14 @@ class BorrowingsConfig(AppConfig):
             period=IntervalSchedule.DAYS,
         )
 
+        task_name = "Check and update overdue borrowings"
+        existing_task = PeriodicTask.objects.filter(name=task_name).first()
+
         # Create or get a periodic task that runs the check_and_update_overdue_borrowings task daily
-        PeriodicTask.objects.get_or_create(
-            name="Check and update overdue borrowings",
-            task="borrowings.tasks.check_overdue_borrowings",
-            interval=schedule,
-            start_time=now(),
-        )
+        if not existing_task:
+            PeriodicTask.objects.create(
+                name=task_name,
+                task="borrowings.tasks.check_overdue_borrowings",
+                interval=schedule,
+                start_time=now(),
+            )

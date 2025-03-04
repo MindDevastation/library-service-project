@@ -15,12 +15,14 @@ router = Router()
 async def cmd_me(message: types.Message, state: FSMContext):
     await message.answer("⏳ Waiting for fetching your profile information...")
 
-    user_id = message.from_user.id
-    user_last_activity[user_id] = asyncio.get_event_loop().time()
-    user_sessions[user_id] = (message, None)
+    telegram_id = message.from_user.id
+    user_last_activity[telegram_id] = asyncio.get_event_loop().time()
+    user_sessions[telegram_id] = (message, None)
 
-    logging.info(f"User {user_id} has started 'me' handling.")
-    logging.info(f"Updated user activity: {user_id} -> {user_last_activity[user_id]}")
+    logging.info(f"User {telegram_id} has started 'me' handling.")
+    logging.info(
+        f"Updated user activity: {telegram_id} -> {user_last_activity[telegram_id]}"
+    )
     logging.info(f"Current user activity dictionary: {user_last_activity}")
 
     user_data = await state.get_data()
@@ -32,7 +34,7 @@ async def cmd_me(message: types.Message, state: FSMContext):
         )
         return
 
-    me = await get_me(user_id)
+    me = await get_me(telegram_id)
 
     info = ""
     info += (
