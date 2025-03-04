@@ -19,12 +19,13 @@ import os
 
 load_dotenv()  # take environment variables from .env.
 
-log_dir = "logs"
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+log_dir = os.path.join(BASE_DIR, "logs")
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
