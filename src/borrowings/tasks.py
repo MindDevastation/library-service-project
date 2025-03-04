@@ -2,11 +2,8 @@ from celery import shared_task
 from django.utils.timezone import now
 from django.core.mail import send_mail
 from django.conf import settings
-from src.borrowings.models import Borrowing
+from borrowings.models import Borrowing
 import requests
-
-
-
 
 
 @shared_task
@@ -55,7 +52,7 @@ def check_and_update_overdue_borrowings():
     borrowings_to_update = Borrowing.objects.filter(
         expected_return_date__lt=today,
         actual_return_date__isnull=True,
-        status=Borrowing.Status.PENDING
+        status=Borrowing.Status.PENDING,
     )
 
     borrowings_to_update.update(status=Borrowing.Status.OVERDUE)
