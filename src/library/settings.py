@@ -193,13 +193,12 @@ LOGGING = {
         },
         "actions_file": {
             "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": os.path.join(BASE_DIR, "logs/actions.log"),
+            "class": "logging.StreamHandler",
+            "formatter": "detailed",
         },
         "borrowing_payment_actions_file": {
             "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": os.path.join(BASE_DIR, "logs/borrowing_payment_actions.log"),
+            "class": "logging.StreamHandler",
         },
     },
     "loggers": {
@@ -251,6 +250,5 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
-
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
