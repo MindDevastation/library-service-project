@@ -8,10 +8,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from paypalrestsdk.exceptions import (
     ResourceNotFound,
-    ClientError,
-    ServerError,
-    MissingConfig,
-    InvalidConfig,
+    UnauthorizedAccess,
 )
 
 from borrowings.models import Borrowing
@@ -31,7 +28,6 @@ class Payment(models.Model):
 
     class Currency(models.TextChoices):
         USD = "USD", "US Dollar"
-        EUR = "EUR", "Euro"
 
     status = models.CharField(
         max_length=10, choices=Status.choices, default=Status.PENDING
@@ -69,21 +65,38 @@ class Payment(models.Model):
 
 
 class StripePayment(Payment):
-    payment_intent_id = models.CharField(max_length=255, blank=True, null=True)
+    session_id = models.CharField(max_length=255, blank=True, null=True)
+    session_url = models.CharField(max_length=255, blank=True, null=True)
     objects = models.Manager()
 
-    def create_payment_intent(self):
+    def create_checkout_session(self):
+        base_url = "http://localhost:8000/api/payments/stripe-"
+
         try:
             stripe.api_key = settings.STRIPE_SECRET_KEY
 
-            payment_intent = stripe.PaymentIntent.create(
-                amount=int(self.amount * 100),
-                currency=self.currency.lower(),
-                metadata={"borrow_id": self.borrowing.id},
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": self.currency.lower(),
+                            "product_data": {
+                                "name": f"Payment for borrowing id {self.borrowing.id}",
+                            },
+                            "unit_amount": int(self.amount * 100),
+                        },
+                        "quantity": 1,
+                    }
+                ],
+                mode="payment",
+                success_url=base_url + "success/?session_id={CHECKOUT_SESSION_ID}",
+                cancel_url=base_url + "cancel/",
             )
-            self.payment_intent_id = payment_intent["id"]
+            self.session_id = session["id"]
+            self.session_url = session["url"]
             self.save()
-            return payment_intent
+            return session
         except stripe.error.StripeError as error:
             raise ValueError(f"Stripe error occurred: {error.user_message}")
 
@@ -91,10 +104,11 @@ class StripePayment(Payment):
 class PayPalPayment(Payment):
     paypal_order_id = models.CharField(max_length=255, blank=True, null=True)
     payer_id = models.CharField(max_length=255, blank=True, null=True)
+    approval_url = models.CharField(max_length=255, blank=True, null=True)
     objects = models.Manager()
 
     def create_order(self):
-        base_url = "http://localhost:8000/api/payments/paypal/"
+        base_url = "http://localhost:8000/api/payments/paypal-"
         try:
             paypalrestsdk.configure(
                 {
@@ -104,45 +118,39 @@ class PayPalPayment(Payment):
                 }
             )
 
-            order_data = {
-                "intent": "CAPTURE",
-                "purchase_units": [
-                    {
-                        "amount": {
-                            "currency_code": self.currency,
-                            "value": str(self.amount),
-                        },
-                        "description": f"Payment for borrowing id {self.borrowing.id}",
-                    }
-                ],
-                "application_context": {
-                    "return_url": f"{base_url}success/",
-                    "cancel_url": f"{base_url}cancel/",
-                },
-            }
+            payment = paypalrestsdk.Payment(
+                {
+                    "intent": "sale",
+                    "payer": {"payment_method": "paypal"},
+                    "transactions": [
+                        {
+                            "amount": {
+                                "total": str(self.amount),
+                                "currency": self.currency,
+                            },
+                            "description": f"Payment for borrowing id {self.borrowing.id}",
+                        }
+                    ],
+                    "redirect_urls": {
+                        "return_url": f"{base_url}success/",
+                        "cancel_url": f"{base_url}cancel/",
+                    },
+                }
+            )
 
-            order = paypalrestsdk.Order()
-            response = order.post('v1/checkout/orders', order_data)
-
-            if response:
-                self.paypal_order_id = response['id']
+            if payment.create():
+                self.paypal_order_id = payment.id
+                for link in payment.links:
+                    if link.rel == "approval_url":
+                        self.approval_url = link.href
+                        break
                 self.save()
-                for link in response['links']:
-                    if link['rel'] == "approve":
-                        return link['href']
+                return self.approval_url
             else:
-                raise ValueError(f"PayPal order creation failed: {order.error}")
+                raise ValueError(f"PayPal payment creation failed: {payment.error}")
         except ResourceNotFound as e:
             raise ValueError(f"Resource not found: {str(e)}")
-        except ClientError as e:
-            raise ValueError(f"Client error: {str(e)}")
-        except ServerError as e:
-            raise ValueError(f"Server error: {str(e)}")
-        except ConnectionError as e:
-            raise ValueError(f"Connection error: {str(e)}")
-        except MissingConfig as e:
-            raise ValueError(f"Missing configuration: {str(e)}")
-        except InvalidConfig as e:
-            raise ValueError(f"Invalid configuration: {str(e)}")
+        except UnauthorizedAccess as e:
+            raise ValueError(f"Unauthorized access: {str(e)}")
         except Exception as e:
             raise ValueError(f"An unexpected error occurred: {str(e)}")

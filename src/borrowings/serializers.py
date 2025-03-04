@@ -8,6 +8,7 @@ from borrowings.validators import (
     BookAvailabilityValidator,
     BorrowingUniqueValidator,
     ExpectedReturnDateValidator,
+    ActiveBorrowingsLimitValidator,
 )
 
 
@@ -43,6 +44,7 @@ class BorrowingDetailSerializer(serializers.ModelSerializer):
             "book",
             "borrow_date",
             "expected_return_date",
+            "actual_return_date",
             "status",
         ]
 
@@ -74,9 +76,22 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
         book = data.get("book")
         validator = BorrowingUniqueValidator(user=user)
         validator(book)
+        validator = ActiveBorrowingsLimitValidator()
+        validator(user=user)
         return data
 
     def create(self, validated_data):
+        """
+        Create a new borrowing record.
+
+        This method performs the following steps within an atomic transaction:
+            1. Retrieves the current user from the serializer context.
+            2. Extracts the 'book' from the validated data.
+            3. Decrements the book's inventory by one and saves the updated book.
+            4. Creates a new borrowing record with a status of 'PENDING'
+            and associates it with the user and book.
+            5. Returns the newly created borrowing instance.
+        """
         user = self.context["request"].user
 
         with transaction.atomic():
@@ -91,3 +106,22 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
                 **validated_data,
             )
             return borrowing
+
+
+class PaymentChoiceSerializer(serializers.Serializer):
+    class ProviderChoices:
+        STRIPE = "stripe"
+        PAYPAL = "paypal"
+        CHOICES = [
+            (STRIPE, "Stripe"),
+            (PAYPAL, "PayPal"),
+        ]
+
+    class CurrencyChoices:
+        USD = "USD"
+        CHOICES = [
+            (USD, "US Dollar"),
+        ]
+
+    provider = serializers.ChoiceField(choices=ProviderChoices.CHOICES)
+    currency = serializers.ChoiceField(choices=CurrencyChoices.CHOICES)

@@ -21,7 +21,6 @@ class BorrowingsConfig(AppConfig):
     def create_periodic_task(self, **kwargs):
         """Creates or retrieves a periodic task for checking overdue borrowings."""
         from django_celery_beat.models import PeriodicTask, IntervalSchedule
-        from borrowings.tasks import check_overdue_borrowings
 
         # Create or get an interval schedule that runs every day
         schedule, created = IntervalSchedule.objects.get_or_create(

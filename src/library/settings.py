@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "payments",
     "users",
     "django_celery_beat",
+    "logging_app",
 ]
 
 MIDDLEWARE = [
@@ -65,6 +66,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "logging_app.middleware.ExceptionLoggingMiddleware",
 ]
 
 ROOT_URLCONF = "library.urls"
@@ -102,6 +104,9 @@ DATABASES = {
         "PORT": os.environ["POSTGRES_DB_PORT"],
         "OPTIONS": {
             "sslmode": "require",
+        },
+        "TEST": {
+            "MIRROR": "default",
         },
     }
 }
@@ -145,19 +150,18 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-SIMPLE_JWT = {
-    "AUTH_HEADER_TYPES": ("Authorize",),
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=100),
-    "ROTATE_REFRESH_TOKENS": False,
-}
-
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 5,
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=100),
+    "ROTATE_REFRESH_TOKENS": False,
 }
 
 AUTH_USER_MODEL = "users.User"
@@ -167,33 +171,55 @@ AUTH_USER_MODEL = "users.User"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "detailed": {
+            "format": "%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+        },
+    },
     "handlers": {
         "error_file": {
             "level": "ERROR",
             "class": "logging.FileHandler",
             "filename": os.path.join(BASE_DIR, "logs/errors.log"),
+            "formatter": "detailed",
         },
-        # "actions_file": {
-        #     "level": "INFO",
-        #     "class": "logging.FileHandler",
-        #     "filename": os.path.join(BASE_DIR, "logs/actions.log"),
-        # },
+        "console": {
+            "level": "ERROR",
+            "class": "logging.StreamHandler",
+            "formatter": "detailed",
+        },
+        "actions_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/actions.log"),
+        },
+        "borrowing_payment_actions_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/borrowing_payment_actions.log"),
+        },
     },
     "loggers": {
         "django": {
-            "handlers": ["error_file"],
+            "handlers": ["error_file", "console"],
             "level": "ERROR",
             "propagate": True,
         },
-        # "user_actions": {
-        #     "handlers": ["actions_file"],
-        #     "level": "INFO",
-        #     "propagate": False,
-        # },
+        "borrowing_user_actions": {
+            "handlers": ["borrowing_payment_actions_file"],
+            "user_actions": {
+                "handlers": ["actions_file"],
+                "level": "INFO",
+                "propagate": False,
+            },
+        },
+        "user_actions": {
+            "handlers": ["actions_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
-
-# Stripe
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
@@ -213,10 +239,9 @@ EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
 EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
 DEFAULT_FROM_EMAIL = os.environ["DEFAULT_FROM_EMAIL"]
 
-
 # Celery Configuration Options
-CELERY_BROKER_URL = "redis://localhost:6379"
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_BROKER_URL = "redis://redis:6379"
+CELERY_RESULT_BACKEND = "redis://redis:6379"
 CELERY_TIMEZONE = "Europe/Kyiv"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60

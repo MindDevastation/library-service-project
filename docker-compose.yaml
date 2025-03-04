@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
 
   redis:
@@ -15,31 +17,17 @@ services:
     build:
       context: .
       dockerfile: docker/api/Dockerfile
-    command: >
-      sh -c "
-        echo 'Waiting for Django application (server volume)...' &&
-        until cd /app; do sleep 1; done &&
-        echo 'Applying database migrations...' &&
-        until python manage.py makemigrations && python manage.py migrate && python manage.py migrate django_celery_beat; do
-          echo 'Waiting for database...'; sleep 2;
-        done &&
-        echo 'Collecting static files...' &&
-        python manage.py collectstatic --noinput &&
-        echo 'Starting Django development server...' &&
-        python manage.py runserver 0.0.0.0:8000
-      "
+    command: ["sh", "/app/scripts/backend_start.sh"]
     working_dir: /app
     env_file:
       - .env
     ports:
       - "8000:8000"
-    depends_on:
-      db:
-        condition: service_healthy
     volumes:
       - ./src:/app
       - library_static_volume:/app/static
       - library_media_volume:/app/media
+      - scripts_volume:/app/scripts
     networks:
       - library-network
     healthcheck:
@@ -60,17 +48,12 @@ services:
     build:
       context: .
       dockerfile: docker/api/Dockerfile
-    command: >
-      sh -c "
-        echo 'Waiting for Django application (server volume)...' &&
-        until cd /app; do sleep 1; done &&
-        echo 'Starting Celery worker...' &&
-        celery -A library.celery worker --loglevel=INFO
-      "
+    command: ["sh", "/app/scripts/worker_start.sh"]
     volumes:
       - ./src:/app
       - library_static_volume:/app/static
       - library_media_volume:/app/media
+      - scripts_volume:/app/scripts
     env_file:
       - .env
     depends_on:
@@ -85,16 +68,10 @@ services:
     build:
       context: .
       dockerfile: docker/api/Dockerfile
-    command: >
-      sh -c "
-        echo 'Waiting for Django application...' &&
-        until cd /app; do sleep 1; done &&
-        echo 'Starting Celery Beat...' &&
-        celery -A library.celery beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler  
-      
-      "
+    command: ["sh", "/app/scripts/celery_beat_start.sh"]
     volumes:
       - ./src:/app
+      - scripts_volume:/app/scripts
     env_file:
       - .env
     depends_on:
@@ -109,13 +86,11 @@ services:
     build:
       context: .
       dockerfile: ./docker/bot/Dockerfile
-    command: >
-      sh -c "
-        echo 'Starting Telegram bot...' &&
-        python bot.py  
-      "
+    command: ["sh", "/app/scripts/bot_start.sh"]
+    working_dir: /app
     volumes:
-      - ./bot:/app
+      - ./src/telegram_bot:/app/telegram_bot
+      - scripts_volume:/app/scripts
     env_file:
       - .env
     depends_on:
@@ -127,6 +102,8 @@ volumes:
   library_static_volume:
   library_media_volume:
   library_postgres_data:
+    driver: local
+  scripts_volume:
     driver: local
 
 networks:
