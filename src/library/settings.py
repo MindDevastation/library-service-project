@@ -33,7 +33,7 @@ SECRET_KEY = "django-insecure-job=!mu53051-giox5!rrxr!q(27n2ift-)f$pbis)@^1k&59#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["d05c-176-111-182-13.ngrok-free.app"]
 
 # Application definition
 
@@ -156,6 +156,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 5,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
