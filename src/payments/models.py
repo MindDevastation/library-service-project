@@ -66,11 +66,11 @@ class Payment(models.Model):
 
 class StripePayment(Payment):
     session_id = models.CharField(max_length=255, blank=True, null=True)
-    session_url = models.CharField(max_length=255, blank=True, null=True)
+    session_url = models.CharField(max_length=512, blank=True, null=True)
     objects = models.Manager()
 
     def create_checkout_session(self):
-        base_url = "http://localhost:8000/api/payments/stripe-"
+        base_url = "https://d05c-176-111-182-13.ngrok-free.app/api/payments/stripe-"
 
         try:
             stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -104,11 +104,11 @@ class StripePayment(Payment):
 class PayPalPayment(Payment):
     paypal_order_id = models.CharField(max_length=255, blank=True, null=True)
     payer_id = models.CharField(max_length=255, blank=True, null=True)
-    approval_url = models.CharField(max_length=255, blank=True, null=True)
+    approval_url = models.CharField(max_length=512, blank=True, null=True)
     objects = models.Manager()
 
     def create_order(self):
-        base_url = "http://localhost:8000/api/payments/paypal-"
+        base_url = "https://d05c-176-111-182-13.ngrok-free.app/api/payments/paypal-"
         try:
             paypalrestsdk.configure(
                 {

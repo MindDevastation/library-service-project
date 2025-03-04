@@ -17,12 +17,14 @@ router = Router()
 @router.message(Command("books"))
 async def cmd_books(message: types.Message, state: FSMContext):
     await message.answer("⏳ Waiting for books...")
-    user_id = message.from_user.id
-    user_last_activity[user_id] = asyncio.get_event_loop().time()
-    user_sessions[user_id] = (message, None)
+    telegram_id = message.from_user.id
+    user_last_activity[telegram_id] = asyncio.get_event_loop().time()
+    user_sessions[telegram_id] = (message, None)
 
-    logging.info(f"User {user_id} has started 'book' handling.")
-    logging.info(f"Updated user activity: {user_id} -> {user_last_activity[user_id]}")
+    logging.info(f"User {telegram_id} has started 'book' handling.")
+    logging.info(
+        f"Updated user activity: {telegram_id} -> {user_last_activity[telegram_id]}"
+    )
     logging.info(f"Current user activity dictionary: {user_last_activity}")
 
     # Check if the user is logged in

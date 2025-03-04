@@ -28,6 +28,6 @@ jobs:
 
       - name: Run tests
         timeout-minutes: 5
-        run: python manage.py test
+        run: python src/manage.py test
         env:
           DJANGO_SETTINGS_MODULE: "library.settings"
