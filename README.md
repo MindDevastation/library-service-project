@@ -611,3 +611,56 @@ async def fetch_data():
 
 - **Concurrency** means that multiple tasks can make progress without waiting for one another. However, they don't necessarily run at the same time. This is the key benefit of using async.
 - **Parallelism** involves tasks running at the same time (which typically requires multi-threading or multi-processing). In contrast, async does not use multiple threads, but it allows tasks to pause while waiting for I/O-bound operations, enabling the event loop to run other tasks in the meantime.
+
+## API Documentation for login_telegram_checkout
+### Description
+This API endpoint allows users to authenticate in the system using their email and password.
+
+### URL
+`POST /api/login-telegram-checkout/`
+
+### Request Parameters
+The request must contain a JSON object with the following fields:
+
+| Field	 | Type	    | Required	| Description      |
+|----------|----------|-----------|------------------|
+| email	 | string	| Yes	    | User's email.    |
+| password	 | string	| Yes	    | User's password. |
+### Example Request
+```json
+{
+  "email": "user@example.com",
+  "password": "securepassword123"
+}
+```
+### Responses
+**Success (200 OK)**
+
+If the user is successfully authenticated, the server returns:
+
+```json
+{
+  "detail": "Login successful"
+}
+```
+**Error 400 (Bad Request)**
+
+If the email or password is missing:
+
+```json
+{
+  "detail": "Email and password are required"
+}
+```
+**Error 401 (Unauthorized)**
+
+If the credentials are incorrect:
+
+```json
+{
+  "detail": "Invalid credentials"
+}
+```
+### Notes
+- Authentication is handled using Django's authenticate function.
+- The email field is used as the username in the custom user model.
