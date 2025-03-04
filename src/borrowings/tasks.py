@@ -15,7 +15,7 @@ def check_overdue_borrowings():
     borrowings_to_update = Borrowing.objects.filter(
         expected_return_date__lt=today,
         actual_return_date__isnull=True,
-        status=Borrowing.Status.PENDING
+        status=Borrowing.Status.PENDING,
     )
     borrowings_to_update.update(status=Borrowing.Status.OVERDUE)
 

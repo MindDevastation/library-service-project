@@ -30,10 +30,8 @@ class Book(models.Model):
     )
     quantity = models.PositiveIntegerField(default=0)
 
-
     def __str__(self):
         return self.title
-
 
     class Meta:
         verbose_name = "Book"

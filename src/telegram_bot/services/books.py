@@ -3,20 +3,20 @@ from telegram_bot.services.db import database
 
 async def get_books():
     query = """
-    SELECT 
+    SELECT
         book.title AS book_title,
         STRING_AGG(author.name, ', ') AS authors,
         book.id AS book_id,
         book.daily_fee
-    FROM 
+    FROM
         books_book book
-    JOIN 
+    JOIN
         books_book_authors ba ON book.id = ba.book_id
-    JOIN 
+    JOIN
         books_author author ON ba.author_id = author.id
-    GROUP BY 
+    GROUP BY
         book.id
-    ORDER BY 
+    ORDER BY
         book.id;
     """
     rows = await database.fetch_all(query)

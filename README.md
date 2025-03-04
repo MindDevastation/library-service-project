@@ -160,7 +160,6 @@ library-service-project/
 │   │   ├── utils/                     # Utility functions for the bot
 │   ├── manage.py                      # Project management script
 │   └── library_db_data.json           # Initial database data
-
 </pre>
 
 | Микросервис на диаграмме | 	Соответствие в Django монолите |
