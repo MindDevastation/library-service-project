@@ -9,6 +9,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
+    services:
+      postgres:
+        image: postgres:13
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: library
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+        options: >-
+          --health-cmd="pg_isready -U user"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -29,6 +44,23 @@ jobs:
           echo "POSTGRES_USER=user" >> $GITHUB_ENV
           echo "POSTGRES_PASSWORD=password" >> $GITHUB_ENV
           echo "POSTGRES_HOST=localhost" >> $GITHUB_ENV
+          echo "POSTGRES_DB_PORT=5432" >> $GITHUB_ENV
+          
+          echo "EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend" >> $GITHUB_ENV
+          echo "EMAIL_HOST=smtp.example.com" >> $GITHUB_ENV
+          echo "EMAIL_PORT=587" >> $GITHUB_ENV
+          echo "EMAIL_HOST_USER=email@example.com" >> $GITHUB_ENV
+          echo "EMAIL_HOST_PASSWORD=password" >> $GITHUB_ENV
+          echo "DEFAULT_FROM_EMAIL=email@example.com" >> $GITHUB_ENV
+          
+          echo "BOT_TOKEN=7805815688:AAEf3B0HUJhIzbin3NrhHiA8OZkGdaQT5y0" >> $GITHUB_ENV
+          
+          echo "STRIPE_PUBLIC_KEY=your_stripe_public_key_here" >> $GITHUB_ENV
+          echo "STRIPE_SECRET_KEY=your_stripe_secret_key_here" >> $GITHUB_ENV
+
+          echo "PAYPAL_CLIENT_ID=your_paypal_client_id_here" >> $GITHUB_ENV
+          echo "PAYPAL_SECRET=your_paypal_secret_here" >> $GITHUB_ENV
+          echo "PAYPAL_MODE=sandbox" >> $GITHUB_ENV
 
       - name: Run flake8
         run: flake8 .

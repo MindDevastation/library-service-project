@@ -19,12 +19,13 @@ import os
 
 load_dotenv()  # take environment variables from .env.
 
-log_dir = "logs"
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+log_dir = os.path.join(BASE_DIR, "logs")
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -193,13 +194,12 @@ LOGGING = {
         },
         "actions_file": {
             "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": os.path.join(BASE_DIR, "logs/actions.log"),
+            "class": "logging.StreamHandler",
+            "formatter": "detailed",
         },
         "borrowing_payment_actions_file": {
             "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": os.path.join(BASE_DIR, "logs/borrowing_payment_actions.log"),
+            "class": "logging.StreamHandler",
         },
     },
     "loggers": {
@@ -251,6 +251,5 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
-
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
