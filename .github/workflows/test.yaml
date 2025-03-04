@@ -9,6 +9,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
+    services:
+      postgres:
+        image: postgres:13
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: library
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+        options: >-
+          --health-cmd="pg_isready -U user"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -29,6 +44,7 @@ jobs:
           echo "POSTGRES_USER=user" >> $GITHUB_ENV
           echo "POSTGRES_PASSWORD=password" >> $GITHUB_ENV
           echo "POSTGRES_HOST=localhost" >> $GITHUB_ENV
+          echo "POSTGRES_DB_PORT=5432" >> $GITHUB_ENV
 
       - name: Run flake8
         run: flake8 .
