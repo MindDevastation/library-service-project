@@ -2,7 +2,6 @@ import asyncio
 import logging
 import os
 import sys
-import django
 
 from aiogram import types
 from aiogram.enums import ParseMode
@@ -15,8 +14,6 @@ from telegram_bot.activity import user_last_activity, user_sessions
 from telegram_bot.services.db import disconnect_db
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "library.settings")
-
-django.setup()
 
 from aiogram import Bot, Dispatcher, Router
 

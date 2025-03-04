@@ -44,48 +44,122 @@ Now black will format the code when you press `Ctrl + Alt + L`.
 
 <pre>
 library-service-project/
-├── src/
-│   ├── library/       # Main project (settings, routes)
-│   ├── users/         # User management application
-│   ├── books/         # Book management application
-│   ├── borrowings/    # Booking management application
-│   ├── payments/      # Payment application
-│   ├── logging_app/   # Logging application
-│   ├── templates/     # Email templates (e.g., return reminders)
-│   ├── library_db_data.json  # Initial data (optional)
-│   ├── telegram_bot/
-│   │   ├── __init__.py
-│   │   ├── config.py       # Configuration (bot token, API URL)
-│   │   ├── main.py         # Starting the bot
-│   │   ├── activity.py     # Activity logging
-│   │   ├── handlers/       # Command handlers
-│   │   │   ├── start.py    # /start command handler
-│   │   │   ├── auth.py     # User authorization handler
-│   │   │   ├── books.py    # Book management handler
-│   │   │   ├── borrowing.py # Booking handler
-│   │   │   ├── help.py     # Help command handler
-│   │   │   ├── me.py       # User info handler
-│   │   │   ├── stop.py     # Stop handler
-│   │   ├── middlewares/    # Middleware (if any)
-│   │   ├── keyboards/      # Custom keyboards for user interactions
-│   │   ├── services/       # API requests (auth, books, borrowing)
-│   │   │   ├── __init__.py
-│   │   │   ├── auth.py     # Auth API
-│   │   │   ├── books.py    # Books API
-│   │   │   ├── borrowing.py # Borrowing API
-│   │   │   ├── bot.py      # Bot-related functions
-│   │   │   ├── db.py       # Database interaction functions
-│   │   │   ├── me.py       # User info API
-│   │   ├── media/          # Media files (images, videos)
-│   │   └── utils/          # Utility functions
-├── requirements.txt        # Dependencies
-├── Dockerfile              # Docker containerization
-├── docker-compose.yml      # Docker configuration
-├── .env                    # Environment variables
-├── .gitignore              # Git ignore file
-├── README.md               # Documentation
-└── .pre-commit-config.yaml # Pre-commit hooks
-
+├── scripts/              # Script folder
+│   ├── backend_start.sh  # Script to run Django backend
+│   ├── worker_start.sh   # A script to run Celery worker
+│   ├── celery_beat_start.sh  # Скрипт для запуска Celery Beat
+│   └── bot_start.sh      # Скрипт для запуска Telegram-бота
+├── docker/                            # Docker configuration
+│   ├── api/                           # Docker for API
+│   │   ├── Dockerfile                 # Dockerfile for API
+│   ├── bot/                           # Docker for Telegram bot
+│   │   ├── Dockerfile                 # Dockerfile for bot
+├── requirements.txt                  # Project dependencies
+├── docker-compose.yml                # Docker Compose configuration
+├── .env                               # Environment variables
+├── .env.sample                        # Example .env file
+├── .gitignore                         # Git ignore file
+├── README.md                          # Project documentation
+├── .dockerignore                      # Docker ignore file
+├── .pre-commit-config.yaml            # Pre-commit hooks configuration
+├── src/                               # Source code of the application
+│   ├── library/                       # Main project
+│   │   ├── __init__.py                # Makes the folder a Python package
+│   │   ├── asgi.py                    # ASGI configuration
+│   │   ├── celery.py                  # Celery configuration
+│   │   ├── settings.py                # Project settings
+│   │   ├── urls.py                    # Main project routes
+│   │   ├── wsgi.py                    # WSGI configuration
+│   ├── users/                         # User management application
+│   │   ├── migrations/                # User migrations
+│   │   ├── __init__.py                # Makes the folder a Python package
+│   │   ├── admin.py                   # Admin panel for users
+│   │   ├── apps.py                    # User application configuration
+│   │   ├── models.py                  # User models
+│   │   ├── serializers.py             # User serializers
+│   │   ├── tests.py                   # Tests for user application
+│   │   ├── urls.py                    # User API routes
+│   │   ├── views.py                   # User API views
+│   ├── books/                         # Book management application
+│   │   ├── migrations/                # Book migrations
+│   │   ├── __init__.py                # Makes the folder a Python package
+│   │   ├── admin.py                   # Admin panel for books
+│   │   ├── apps.py                    # Book application configuration
+│   │   ├── models.py                  # Book models
+│   │   ├── serializers.py             # Book serializers
+│   │   ├── tasks.py                   # Celery tasks for books
+│   │   ├── tests.py                   # Tests for book application
+│   │   ├── urls.py                    # Book API routes
+│   │   ├── views.py                   # Book API views
+│   ├── borrowings/                    # Booking management application
+│   │   ├── migrations/                # Booking migrations
+│   │   ├── admin.py                   # Admin panel for bookings
+│   │   ├── apps.py                    # Booking application configuration
+│   │   ├── models.py                  # Booking models
+│   │   ├── permissions.py             # Booking permissions
+│   │   ├── schema.py                  # Booking schema
+│   │   ├── serializers.py             # Booking serializers
+│   │   ├── signals.py                 # Booking signals
+│   │   ├── tasks.py                   # Celery tasks for bookings
+│   │   ├── tests.py                   # Tests for booking application
+│   │   ├── urls.py                    # Booking API routes
+│   │   ├── validators.py              # Booking validation
+│   │   ├── views.py                   # Booking API views
+│   ├── payments/                      # Payment application
+│   │   ├── migrations/                # Payment migrations
+│   │   ├── __init__.py                # Makes the folder a Python package
+│   │   ├── admin.py                   # Admin panel for payments
+│   │   ├── apps.py                    # Payment application configuration
+│   │   ├── helpers.py                 # Payment helper functions
+│   │   ├── models.py                  # Payment models
+│   │   ├── serializers.py             # Payment serializers
+│   │   ├── tests.py                   # Tests for payment application
+│   │   ├── urls.py                    # Payment API routes
+│   │   ├── views.py                   # Payment API views
+│   ├── logging_app/                   # Logging application
+│   │   ├── migrations/                # Logging migrations
+│   │   ├── __init__.py                # Makes the folder a Python package
+│   │   ├── admin.py                   # Admin panel for logs
+│   │   ├── apps.py                    # Logging application configuration
+│   │   ├── middleware.py              # Logging middleware
+│   │   ├── models.py                  # Logging models
+│   │   ├── signals.py                 # Logging signals
+│   │   ├── utils.py                   # Logging utilities
+│   │   ├── views.py                   # Logging API views
+│   ├── logs/                          # Log files
+│   │   ├── actions.log                # User action logs
+│   │   ├── borrowing_payment_actions.log # Borrowing payment action logs
+│   │   ├── errors.log                 # Error logs
+│   ├── templates/                     # Email templates
+│   │   ├── borrowing_confirmation_email.html # Template for borrowing confirmation
+│   │   ├── borrowing_status_update_email.html # Template for status update on borrowing
+│   │   ├── registration_success_email.html # Template for successful registration
+│   ├── telegram_bot/                  # Telegram bot
+│   │   ├── __init__.py                # Makes the folder a Python package
+│   │   ├── config.py                  # Bot configuration (token, API URL)
+│   │   ├── main.py                    # Main script to run the bot
+│   │   ├── activity.py                # User activity logging
+│   │   ├── handlers/                  # Command handlers for the bot
+│   │   │   ├── start.py               # /start command handler
+│   │   │   ├── auth.py                # Authorization command handler
+│   │   │   ├── books.py               # Book interaction handler
+│   │   │   ├── borrowing.py           # Borrowing command handler
+│   │   │   ├── help.py                # /help command handler
+│   │   │   ├── me.py                  # User info handler
+│   │   │   ├── stop.py                # /stop command handler
+│   │   ├── middlewares/               # Middleware for handling requests
+│   │   ├── keyboards/                 # Custom keyboards for bot interactions
+│   │   ├── services/                  # API services for interacting with the backend
+│   │   │   ├── auth.py                # Authentication API
+│   │   │   ├── books.py               # Books API
+│   │   │   ├── borrowing.py           # Borrowing API
+│   │   │   ├── bot.py                 # Bot-related functions
+│   │   │   ├── db.py                  # Database interaction functions
+│   │   │   ├── me.py                  # User info API
+│   │   ├── media/                     # Media files (images, videos)
+│   │   ├── utils/                     # Utility functions for the bot
+│   ├── manage.py                      # Project management script
+│   └── library_db_data.json           # Initial database data
 
 </pre>
 
