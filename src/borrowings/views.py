@@ -27,12 +27,9 @@ class BorrowingViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "post"]
 
     def get_permissions(self):
-        permission_classes = [IsBorrowingOwnerOrAdmin()]
-
         if self.action == "create":
-            permission_classes = [IsBorrowingOwnerOrAdmin(), HasNoPendingPayments()]
-
-        return permission_classes
+            return [IsBorrowingOwnerOrAdmin(), HasNoPendingPayments()]
+        return [IsBorrowingOwnerOrAdmin()]
 
     def get_serializer_class(self):
         if self.action == "retrieve":
