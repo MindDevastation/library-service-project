@@ -344,52 +344,45 @@ class BorrowingViewSetTest(TestCase):
 
     def test_return_book(self):
         self.client.force_authenticate(user=self.user)
+        providers = [
+            (
+                "stripe",
+                "https://stripe.com/pay/123",
+                "payments.helpers.create_stripe_payment",
+            ),
+            (
+                "paypal",
+                "https://paypal.com/approval/456",
+                "payments.helpers.create_paypal_payment",
+            ),
+        ]
+        for provider, expected_url, patch_target in providers:
+            self.borrowing.status = Borrowing.Status.PENDING
+            self.borrowing.save()
+            self.book.inventory = 1
+            self.book.save()
 
-        data_stripe = {"provider": "stripe", "currency": "USD"}
-        with patch("borrowings.views.create_stripe_payment") as mock_stripe:
-            mock_session = MagicMock()
-            mock_session.url = "https://stripe.com/pay/123"
-            mock_stripe.return_value = (None, mock_session)
+            with patch(patch_target) as mock_payment:
+                if provider == "stripe":
+                    mock_session = MagicMock()
+                    mock_session.url = expected_url
+                    mock_payment.return_value = (None, mock_session)
+                else:
+                    mock_payment.return_value = (None, expected_url)
+                response = self.client.post(
+                    f"/api/borrowings/{self.borrowing.id}/return/",
+                    {"provider": provider, "currency": "USD"},
+                )
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertEqual(
+                    response.data["message"], "Borrowing returned successfully"
+                )
+                self.assertEqual(response.data["go_to_pay"], expected_url)
 
-            response_stripe = self.client.post(
-                f"/api/borrowings/{self.borrowing.id}/return/", data_stripe
-            )
-            self.assertEqual(response_stripe.status_code, status.HTTP_200_OK)
-            self.assertEqual(
-                response_stripe.data["message"], "Borrowing returned successfully"
-            )
-            self.assertEqual(
-                response_stripe.data["go_to_pay"], "https://stripe.com/pay/123"
-            )
-
-        self.borrowing.refresh_from_db()
-        self.assertEqual(self.borrowing.status, Borrowing.Status.RETURNED)
-        self.book.refresh_from_db()
-        self.assertEqual(self.book.inventory, 2)
-
-        self.borrowing.status = Borrowing.Status.PENDING
-        self.borrowing.save()
-        self.book.inventory = 1
-        self.book.save()
-
-        data_paypal = {"provider": "paypal", "currency": "USD"}
-        with patch("borrowings.views.create_paypal_payment") as mock_paypal:
-            mock_paypal.return_value = (None, "https://paypal.com/approval/456")
-            response_paypal = self.client.post(
-                f"/api/borrowings/{self.borrowing.id}/return/", data_paypal
-            )
-            self.assertEqual(response_paypal.status_code, status.HTTP_200_OK)
-            self.assertEqual(
-                response_paypal.data["message"], "Borrowing returned successfully"
-            )
-            self.assertEqual(
-                response_paypal.data["go_to_pay"], "https://paypal.com/approval/456"
-            )
-
-        self.borrowing.refresh_from_db()
-        self.assertEqual(self.borrowing.status, Borrowing.Status.RETURNED)
-        self.book.refresh_from_db()
-        self.assertEqual(self.book.inventory, 2)
+            self.borrowing.refresh_from_db()
+            self.book.refresh_from_db()
+            self.assertEqual(self.borrowing.status, Borrowing.Status.RETURNED)
+            self.assertEqual(self.book.inventory, 2)
 
     def test_return_already_returned_book(self):
         self.borrowing.status = Borrowing.Status.RETURNED
@@ -407,46 +400,38 @@ class BorrowingViewSetTest(TestCase):
 
     def test_return_book_admin_can_return_any(self):
         self.client.force_authenticate(user=self.admin)
+        providers = [
+            (
+                "stripe",
+                "https://stripe.com/pay/456",
+                "payments.helpers.create_stripe_payment",
+            ),
+            (
+                "paypal",
+                "https://paypal.com/approval/789",
+                "payments.helpers.create_paypal_payment",
+            ),
+        ]
+        for provider, expected_url, patch_target in providers:
+            self.other_borrowing.status = Borrowing.Status.PENDING
+            self.other_borrowing.save()
 
-        data_stripe = {"provider": "stripe", "currency": "USD"}
-        with patch("borrowings.views.create_stripe_payment") as mock_stripe:
-            mock_session = MagicMock()
-            mock_session.url = "https://stripe.com/pay/456"
-            mock_stripe.return_value = (
-                None,
-                mock_session,
-            )
+            with patch(patch_target) as mock_payment:
+                if provider == "stripe":
+                    mock_session = MagicMock()
+                    mock_session.url = expected_url
+                    mock_payment.return_value = (None, mock_session)
+                else:
+                    mock_payment.return_value = (None, expected_url)
+                response = self.client.post(
+                    f"/api/borrowings/{self.other_borrowing.id}/return/",
+                    {"provider": provider, "currency": "USD"},
+                )
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertEqual(
+                    response.data["message"], "Borrowing returned successfully"
+                )
+                self.assertEqual(response.data["go_to_pay"], expected_url)
 
-            response_stripe = self.client.post(
-                f"/api/borrowings/{self.other_borrowing.id}/return/", data_stripe
-            )
-            self.assertEqual(response_stripe.status_code, status.HTTP_200_OK)
-            self.assertEqual(
-                response_stripe.data["message"], "Borrowing returned successfully"
-            )
-            self.assertEqual(
-                response_stripe.data["go_to_pay"], "https://stripe.com/pay/456"
-            )
-
-        self.other_borrowing.refresh_from_db()
-        self.assertEqual(self.other_borrowing.status, Borrowing.Status.RETURNED)
-
-        self.other_borrowing.status = Borrowing.Status.PENDING
-        self.other_borrowing.save()
-
-        data_paypal = {"provider": "paypal", "currency": "USD"}
-        with patch("borrowings.views.create_paypal_payment") as mock_paypal:
-            mock_paypal.return_value = (None, "https://paypal.com/approval/789")
-            response_paypal = self.client.post(
-                f"/api/borrowings/{self.other_borrowing.id}/return/", data_paypal
-            )
-            self.assertEqual(response_paypal.status_code, status.HTTP_200_OK)
-            self.assertEqual(
-                response_paypal.data["message"], "Borrowing returned successfully"
-            )
-            self.assertEqual(
-                response_paypal.data["go_to_pay"], "https://paypal.com/approval/789"
-            )
-
-        self.other_borrowing.refresh_from_db()
-        self.assertEqual(self.other_borrowing.status, Borrowing.Status.RETURNED)
+            self.other_borrowing.refresh_from_db()
+            self.assertEqual(self.other_borrowing.status, Borrowing.Status.RETURNED)
