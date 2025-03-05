@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from django.db import transaction
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -14,7 +12,8 @@ from borrowings.serializers import (
     BorrowingCreateSerializer,
     PaymentChoiceSerializer,
 )
-from payments.helpers import create_stripe_payment, create_paypal_payment
+from borrowings.helpers import complete_return
+from payments.helpers import calculate_payment, process_payment
 
 
 @borrowings_schema_view
@@ -81,7 +80,7 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         with transaction.atomic():
             borrowing = self.get_object()
 
-            if borrowing.status == Borrowing.Status.RETURNED:
+            if borrowing.status == borrowing.Status.RETURNED:
                 return Response(
                     {"message": "Borrowing is already returned"},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -90,51 +89,20 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
-            borrowing.status = Borrowing.Status.RETURNED
-            borrowing.save()
-            book = borrowing.book
-            book.inventory += 1
-            book.save()
+            complete_return(borrowing)
 
             provider = serializer.validated_data["provider"]
             currency = serializer.validated_data["currency"]
-            daily_fee = borrowing.book.daily_fee
-            day_pass = (borrowing.actual_return_date - borrowing.borrow_date).days
-            if day_pass == 0:
-                day_pass += 1
 
-            money_to_pay = daily_fee * Decimal(day_pass)
-            payment_type = "PAYMENT"
-            fine_multiplier = Decimal("2")
-            days_of_overdue = Decimal(
-                (borrowing.actual_return_date - borrowing.expected_return_date).days
+            money_to_pay, payment_type = calculate_payment(borrowing)
+            go_to_pay = process_payment(
+                borrowing, money_to_pay, currency, payment_type, provider
             )
-            fine_amount = days_of_overdue * daily_fee * fine_multiplier
 
-            if borrowing.actual_return_date > borrowing.expected_return_date:
-                money_to_pay += fine_amount
-                payment_type = "FINE"
-
-            if provider == "stripe":
-                stripe_payment, session = create_stripe_payment(
-                    borrowing, money_to_pay, currency, payment_type
-                )
-                return Response(
-                    {
-                        "message": "Borrowing returned successfully",
-                        "go_to_pay": session.url,
-                    },
-                    status=status.HTTP_200_OK,
-                )
-
-            elif provider == "paypal":
-                paypal_payment, approval_url = create_paypal_payment(
-                    borrowing, money_to_pay, currency, payment_type
-                )
-                return Response(
-                    {
-                        "message": "Borrowing returned successfully",
-                        "go_to_pay": approval_url,
-                    },
-                    status=status.HTTP_200_OK,
-                )
+            return Response(
+                {
+                    "message": "Borrowing returned successfully",
+                    "go_to_pay": go_to_pay,
+                },
+                status=status.HTTP_200_OK,
+            )
