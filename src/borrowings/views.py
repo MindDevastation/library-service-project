@@ -50,22 +50,25 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         is_active = self.request.query_params.get("is_active")
         user_id = self.request.query_params.get("user_id")
 
+        filter_kwargs = {}
+
         if is_active:
-            if is_active.lower() == "true":
-                queryset = queryset.filter(
-                    status__in=[Borrowing.Status.PENDING, Borrowing.Status.OVERDUE]
-                )
-            if is_active.lower() == "false":
-                queryset = queryset.filter(status__in=[Borrowing.Status.RETURNED])
+            active_value = is_active.lower()
+            if active_value == "true":
+                filter_kwargs["status__in"] = [
+                    Borrowing.Status.PENDING,
+                    Borrowing.Status.OVERDUE,
+                ]
+            elif active_value == "false":
+                filter_kwargs["status__in"] = [Borrowing.Status.RETURNED]
 
-        if user_id and user_id.isdigit():
-            if user.is_superuser or user_id == str(user.id):
-                queryset = queryset.filter(user_id=user_id)
+        if user.is_superuser:
+            if user_id and user_id.isdigit():
+                filter_kwargs["user_id"] = user_id
+        else:
+            filter_kwargs["user"] = user
 
-        if not user.is_superuser:
-            queryset = queryset.filter(user=user)
-
-        return queryset
+        return queryset.filter(**filter_kwargs)
 
     @action(detail=True, methods=["post"], url_path="return")
     def return_book(self, request, pk=None):
