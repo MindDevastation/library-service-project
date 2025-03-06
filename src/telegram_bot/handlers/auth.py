@@ -11,7 +11,6 @@ from telegram_bot.activity import user_last_activity, user_sessions
 from telegram_bot.services.auth import login_user
 from telegram_bot.services.db import database
 
-
 router = Router()
 
 
@@ -34,8 +33,13 @@ async def cmd_login(message: types.Message, state: FSMContext):
     )
     logging.info(f"Current user activity dictionary: {user_last_activity}")
 
-    if database.is_connected:
-        # Check if there is a user with this telegram_id
+    if not database.is_connected:
+        await message.answer(
+            "You still not started. Please write /start to get started."
+        )
+        return
+
+    try:
         query = "SELECT email FROM users_user WHERE telegram_id = :telegram_id"
         user = await database.fetch_one(query, {"telegram_id": telegram_id})
 
@@ -49,9 +53,10 @@ async def cmd_login(message: types.Message, state: FSMContext):
         else:
             await message.answer("🔑 Please enter your email to log in.")
             await state.set_state(AuthState.waiting_for_email)
-    else:
+    except Exception as e:
+        logging.error(f"Error checking user in database: {e}", exc_info=True)
         await message.answer(
-            "You still not started. Please write /start to get started."
+            "🚨 An error occurred while checking your account. Please try again later."
         )
 
 
@@ -80,25 +85,31 @@ async def handle_password(message: types.Message, state: FSMContext):
     telegram_id = message.from_user.id
 
     if login_user(email, password):
-        # After successful login, we immediately write telegram_id
-        update_query = """
-                            UPDATE users_user
-                            SET telegram_id = :telegram_id
-                            WHERE email = :email
-                            """
-        await database.execute(
-            update_query, {"telegram_id": telegram_id, "email": email}
-        )
+        try:
+            update_query = """
+                UPDATE users_user
+                SET telegram_id = :telegram_id
+                WHERE email = :email
+            """
+            await database.execute(
+                update_query, {"telegram_id": telegram_id, "email": email}
+            )
 
-        await message.answer(
-            "✅ You've successfully logged in! You now have access to the library. \n"
-            "Type /help to see available commands."
-        )
-        await state.set_state(AuthState.authenticated)
+            await message.answer(
+                "✅ You've successfully logged in! You now have access to the library. \n"
+                "Type /help to see available commands."
+            )
+            await state.set_state(AuthState.authenticated)
+        except Exception as e:
+            logging.error(f"Error updating user Telegram ID: {e}", exc_info=True)
+            await message.answer(
+                "🚨 An error occurred while updating your account. Please try again later."
+            )
+            return
     else:
         await message.answer("❌ Invalid email or password. Try again.")
         await state.finish()
-    telegram_id = message.from_user.id
+
     user_last_activity[telegram_id] = asyncio.get_event_loop().time()
     user_sessions[telegram_id] = (message, None)
 

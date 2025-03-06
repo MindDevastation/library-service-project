@@ -34,15 +34,25 @@ async def cmd_me(message: types.Message, state: FSMContext):
         )
         return
 
-    me = await get_me(telegram_id)
+    try:
+        me = await get_me(telegram_id)
 
-    info = ""
-    info += (
-        f"Name: {me['first_name']} {me['last_name']}\n"
-        f"Email: {me['email']}\n"
-        f"Joined on: {me['date_joined']}\n"
-        f"Last login: {me['last_login']}\n\n"
-        f"To navigate through library type /help"
-    )
+        if me:
+            info = (
+                f"Name: {me['first_name']} {me['last_name']}\n"
+                f"Email: {me['email']}\n"
+                f"Joined on: {me['date_joined']}\n"
+                f"Last login: {me['last_login']}\n\n"
+                f"To navigate through library type /help"
+            )
+            await message.answer(f"Here is your profile information:\n\n{info}")
+        else:
+            await message.answer(
+                "⚠️ Unable to retrieve your profile information. Please try again later."
+            )
 
-    await message.answer(f"Here is your profile information:\n\n{info}")
+    except Exception as e:
+        logging.error(f"Error fetching profile information: {e}", exc_info=True)
+        await message.answer(
+            "🚨 An error occurred while fetching your profile. Please try again later."
+        )
