@@ -18,7 +18,6 @@ async def send_borrowing_notification(borrowing):
         f"Expected money to pay: {(difference.days + 1) * book.daily_fee}\n"
     )
     try:
-        # Sending a message to a user via Telegram ID
         await bot.send_message(user.telegram_id, message)
     except Exception as e:
         print(f"Error sending message: {e}")
@@ -36,7 +35,6 @@ async def send_payment_notification(payment):
         f"Money to pay: {payment.amount}\n"
     )
     try:
-        # Sending a message to a user via Telegram ID
         await bot.send_message(user.telegram_id, message)
     except Exception as e:
         print(f"Error sending message: {e}")

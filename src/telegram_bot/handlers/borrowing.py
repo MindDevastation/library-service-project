@@ -34,25 +34,34 @@ async def cmd_me(message: types.Message, state: FSMContext):
         )
         return
 
-    borrowings = await get_borrowing(telegram_id)
+    try:
+        borrowings = await get_borrowing(telegram_id)
 
-    if borrowings:
-        borrowing_list = ""
+        if borrowings:
+            borrowing_list = ""
 
-        for borrowing in borrowings:
-            borrowing_list += (
-                f"📚 <b>Book:</b> {borrowing['book_title']}\n"
-                f"✍️ <b>Authors:</b> {borrowing['authors']}\n"
-                f"👀 <b>Status:</b> {borrowing['status']}\n"
-                f"🕔 <b>Borrowed:</b> {borrowing['borrow_date']}\n"
-                f"🕧 <b>Expected return date:</b> {borrowing['expected_return_date']}\n"
-                f"🕐 <b>Actual return date:</b> {borrowing['actual_return_date']}\n"
-                f"---------------\n"
+            for borrowing in borrowings:
+                borrowing_list += (
+                    f"📚 <b>Book:</b> {borrowing['book_title']}\n"
+                    f"✍️ <b>Authors:</b> {borrowing['authors']}\n"
+                    f"👀 <b>Status:</b> {borrowing['status']}\n"
+                    f"🕔 <b>Borrowed:</b> {borrowing['borrow_date']}\n"
+                    f"🕧 <b>Expected return date:</b> {borrowing['expected_return_date']}\n"
+                    f"🕐 <b>Actual return date:</b> {borrowing['actual_return_date']}\n"
+                    f"---------------\n"
+                )
+
+            await message.answer(
+                f"Here is your borrowing history:\n\n{borrowing_list}",
+                parse_mode="HTML",
+            )
+        else:
+            await message.answer(
+                "You still don't have any borrowings. Let`s change this!"
             )
 
+    except Exception as e:
+        logging.error(f"Error fetching borrowings: {e}", exc_info=True)
         await message.answer(
-            f"Here is your borrowing history:\n\n{borrowing_list}", parse_mode="HTML"
+            "🚨 An error occurred while fetching your borrowings. Please try again later."
         )
-
-    else:
-        await message.answer("You still don't have any borrowings. Let`s change this!")
