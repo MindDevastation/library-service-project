@@ -162,8 +162,9 @@ class PayPalPaymentSuccessView(APIView):
 
                 if payment:
                     if payment.execute({"payer_id": payer_id}):
-                        paypal_payment.status = PayPalPayment.Status.PAID
-                        paypal_payment.save()
+                        if not paypal_payment.status == "PAID":
+                            paypal_payment.status = PayPalPayment.Status.PAID
+                            paypal_payment.save()
                         return Response(
                             {"status": "Payment completed successfully!"},
                             status=status.HTTP_200_OK,
