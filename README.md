@@ -179,13 +179,127 @@ library-service-project/
 - Password
 - Is staff
 
-## Borrowing (Taras)
+## Borrowing Endpoints
 
-- Borrow date
-- Expected Return date
-- Actual Return date
-- Book id -> Books 1-1
-- User id -> Users 1-1
+#### **GET /api/borrowings/** (List all borrowings with filtering)
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer jwt-token-here"
+  }
+  ```
+- **Query Parameters:**
+  - `is_active=true/false` (Filters active borrowings)
+  - `user_id={id}` (Admins can filter by user ID)
+- **Response:**
+  ```json
+  [
+    {
+      "id": 1,
+      "user_email": "user1@example.com",
+      "book_title": "The Catcher in the Rye",
+      "book_authors": [
+        {
+          "id": 3,
+          "name": "J.D. Salinger"
+        }
+      ],
+      "borrow_date": "2025-03-10",
+      "expected_return_date": "2025-03-25",
+      "status": "pending"
+    },
+    {
+      "id": 2,
+      "user_email": "user2@example.com",
+      "book_title": "1984",
+      "book_authors": [
+        {
+          "id": 2,
+          "name": "George Orwell"
+        }
+      ],
+      "borrow_date": "2025-02-15",
+      "expected_return_date": "2025-03-01",
+      "status": "overdue"
+    }
+  ]
+  ```
+
+#### **GET /api/borrowings/{id}/** (Retrieve a single borrowing record)
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer jwt-token-here"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "id": 1,
+    "user_email": "user1@example.com",
+    "book": {
+      "title": "The Catcher in the Rye",
+      "authors": [
+        {
+          "id": 1,
+          "name": "J.D. Salinger"
+        }
+      ],
+      "inventory": 3,
+      "description": "two days in the life of 16-year-old Holden Caulfield after he has been expelled from prep school"
+    },
+    "borrow_date": "2025-03-10",
+    "expected_return_date": "2025-03-25",
+    "actual_return_date": null,
+    "status": "pending"
+  }
+  ```
+
+#### **POST /api/borrowings/** (Create a new borrowing record)
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer jwt-token-here"
+  }
+  ```
+- **Request Body:**
+  ```json
+  {
+    "book": 1,
+    "expected_return_date": "2025-03-25"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "id": 3,
+    "book": 1,
+    "expected_return_date": "2025-03-25",
+    "status": "pending"
+  }
+  ```
+
+#### **POST /api/borrowings/{id}/return/** (Return a borrowed book)
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer jwt-token-here"
+  }
+  ```
+- **Request Body:**
+  ```json
+  {
+    "provider": "Stripe",
+    "currency": "USD"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "message": "Borrowing returned successfully",
+    "go_to_pay": "https://payment-provider.com/pay"
+  }
+  ```
 
 ## Payment (Nick)
 

@@ -2,8 +2,6 @@ import os
 
 from celery import shared_task
 from django.utils.timezone import now
-from django.core.mail import send_mail
-from django.conf import settings
 from borrowings.models import Borrowing
 import requests
 
