@@ -179,6 +179,48 @@ library-service-project/
 - Password
 - Is staff
 
+# Borrowing Service
+
+The borrowing service allows users to temporarily borrow books and track their return. The functionality includes creating borrowing records, checking book availability, tracking return status, limiting active borrowings, and verifying outstanding debts. Additionally, the system automatically updates the status of overdue borrowings and sends notifications.
+
+## Main Model: Borrowing
+
+The `Borrowing` model represents a record of a user borrowing a book and contains the following key fields:
+
+- `borrow_date` – the date of borrowing (automatically set when the record is created).
+- `expected_return_date` – the expected return date.
+- `actual_return_date` – the actual return date (can be empty until the book is returned).
+- `status` – the status of the borrowing ("pending", "returned", "overdue").
+- `book` – the book that was borrowed.
+- `user` – the user who borrowed the book.
+
+### Status Update Logic
+
+- When a book is returned, the status changes to `returned`, and if the actual return date is not set, it is assigned the current date.
+- If the expected return date has passed and the book has not been returned, the status automatically changes to `overdue`.
+
+## Data Validation
+
+The system applies multiple levels of data validation before saving a borrowing record:
+
+1. **Inventory Check** – Prevents borrowing if the book is not available in stock.
+2. **Return Date Validation** – Ensures that the return date is not set in the past or beyond the maximum allowed period (30 days).
+3. **Unique Borrowing Restriction** – A user cannot borrow the same book again while it is still in their possession.
+4. **Borrowing Limit** – A user cannot have more than 5 active borrowings at the same time.
+
+## Access Restrictions
+
+To ensure security and control over borrowings, the following access levels are implemented:
+
+- Users can only view their own borrowings.
+- Administrators have access to all borrowing records.
+- A new borrowing request cannot be created if the user has outstanding payments.
+
+## Process Automation
+
+- **Overdue Borrowing Check**: Performed as a background task (using Celery). All borrowings past their return deadline are updated to `overdue` status.
+- **Notifications**: If there are overdue borrowings, the system sends a message via Telegram.
+
 ## Borrowing Endpoints
 
 #### **GET /api/borrowings/** (List all borrowings with filtering)
@@ -300,6 +342,9 @@ library-service-project/
     "go_to_pay": "https://payment-provider.com/pay"
   }
   ```
+## Payments and Financial Restrictions
+
+Before creating a new borrowing record, the system verifies whether the user has outstanding payments. If there are unpaid transactions via Stripe or PayPal, borrowing is blocked until the payments are settled.
 
 ## Payment (Nick)
 
