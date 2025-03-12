@@ -179,13 +179,172 @@ library-service-project/
 - Password
 - Is staff
 
-## Borrowing (Taras)
+# Borrowing Service
 
-- Borrow date
-- Expected Return date
-- Actual Return date
-- Book id -> Books 1-1
-- User id -> Users 1-1
+The borrowing service allows users to temporarily borrow books and track their return. The functionality includes creating borrowing records, checking book availability, tracking return status, limiting active borrowings, and verifying outstanding debts. Additionally, the system automatically updates the status of overdue borrowings and sends notifications.
+
+## Main Model: Borrowing
+
+The `Borrowing` model represents a record of a user borrowing a book and contains the following key fields:
+
+- `borrow_date` – the date of borrowing (automatically set when the record is created).
+- `expected_return_date` – the expected return date.
+- `actual_return_date` – the actual return date (can be empty until the book is returned).
+- `status` – the status of the borrowing ("pending", "returned", "overdue").
+- `book` – the book that was borrowed.
+- `user` – the user who borrowed the book.
+
+### Status Update Logic
+
+- When a book is returned, the status changes to `returned`, and if the actual return date is not set, it is assigned the current date.
+- If the expected return date has passed and the book has not been returned, the status automatically changes to `overdue`.
+
+## Data Validation
+
+The system applies multiple levels of data validation before saving a borrowing record:
+
+1. **Inventory Check** – Prevents borrowing if the book is not available in stock.
+2. **Return Date Validation** – Ensures that the return date is not set in the past or beyond the maximum allowed period (30 days).
+3. **Unique Borrowing Restriction** – A user cannot borrow the same book again while it is still in their possession.
+4. **Borrowing Limit** – A user cannot have more than 5 active borrowings at the same time.
+
+## Access Restrictions
+
+To ensure security and control over borrowings, the following access levels are implemented:
+
+- Users can only view their own borrowings.
+- Administrators have access to all borrowing records.
+- A new borrowing request cannot be created if the user has outstanding payments.
+
+## Process Automation
+
+- **Overdue Borrowing Check**: Performed as a background task (using Celery). All borrowings past their return deadline are updated to `overdue` status.
+- **Notifications**: If there are overdue borrowings, the system sends a message via Telegram.
+
+## Borrowing Endpoints
+
+#### **GET /api/borrowings/** (List all borrowings with filtering)
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer jwt-token-here"
+  }
+  ```
+- **Query Parameters:**
+  - `is_active=true/false` (Filters active borrowings)
+  - `user_id={id}` (Admins can filter by user ID)
+- **Response:**
+  ```json
+  [
+    {
+      "id": 1,
+      "user_email": "user1@example.com",
+      "book_title": "The Catcher in the Rye",
+      "book_authors": [
+        {
+          "id": 3,
+          "name": "J.D. Salinger"
+        }
+      ],
+      "borrow_date": "2025-03-10",
+      "expected_return_date": "2025-03-25",
+      "status": "pending"
+    },
+    {
+      "id": 2,
+      "user_email": "user2@example.com",
+      "book_title": "1984",
+      "book_authors": [
+        {
+          "id": 2,
+          "name": "George Orwell"
+        }
+      ],
+      "borrow_date": "2025-02-15",
+      "expected_return_date": "2025-03-01",
+      "status": "overdue"
+    }
+  ]
+  ```
+
+#### **GET /api/borrowings/{id}/** (Retrieve a single borrowing record)
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer jwt-token-here"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "id": 1,
+    "user_email": "user1@example.com",
+    "book": {
+      "title": "The Catcher in the Rye",
+      "authors": [
+        {
+          "id": 1,
+          "name": "J.D. Salinger"
+        }
+      ],
+      "inventory": 3,
+      "description": "two days in the life of 16-year-old Holden Caulfield after he has been expelled from prep school"
+    },
+    "borrow_date": "2025-03-10",
+    "expected_return_date": "2025-03-25",
+    "actual_return_date": null,
+    "status": "pending"
+  }
+  ```
+
+#### **POST /api/borrowings/** (Create a new borrowing record)
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer jwt-token-here"
+  }
+  ```
+- **Request Body:**
+  ```json
+  {
+    "book": 1,
+    "expected_return_date": "2025-03-25"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "id": 3,
+    "book": 1,
+    "expected_return_date": "2025-03-25",
+    "status": "pending"
+  }
+  ```
+
+#### **POST /api/borrowings/{id}/return/** (Return a borrowed book)
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer jwt-token-here"
+  }
+  ```
+- **Request Body:**
+  ```json
+  {
+    "provider": "Stripe",
+    "currency": "USD"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "message": "Borrowing returned successfully",
+    "go_to_pay": "https://payment-provider.com/pay"
+  }
+  ```
+## Payments and Financial Restrictions
+
+Before creating a new borrowing record, the system verifies whether the user has outstanding payments. If there are unpaid transactions via Stripe or PayPal, borrowing is blocked until the payments are settled.
 
 ## Payment (Nick)
 
