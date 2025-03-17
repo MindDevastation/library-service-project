@@ -327,8 +327,37 @@ Or check error logs in file:
 
 `logs/errors.log`
 
+## Payments & Borrowings overview
 
-## Setting Up Payments with PayPal and Stripe (Test Mode)
+This project integrates payment processing using PayPal and Stripe. Below is a detailed guide on how to set up and use these payment gateways in test mode. Additionally, we have implemented features for managing borrowing records, handling payments, and returning borrowed books.
+
+### Borrowing Management:
+
+- Users can borrow books and return them.
+- Borrowing records are managed with statuses: PENDING, RETURNED, OVERDUE.
+- Integrated borrowing validation and status updates.
+- Enhanced logic for calculating payment amounts based on borrowing duration and overdue fines.
+
+### Payment Integration:
+
+- Implemented payment processing using Stripe and PayPal.
+- Added utility functions for creating payment records in the database.
+- Integrated choice fields for selecting payment providers.
+- Implemented APIs for returning books with payment handling.
+
+### Utility Functions:
+
+- create_stripe_payment: Creates a Stripe payment instance and returns the payment and checkout session.
+- create_paypal_payment: Creates a PayPal payment instance and returns the payment and approval URL.
+- calculate_payment: Calculates the total amount to be paid and determines the payment type based on the borrowing record.
+- process_payment: Processes the payment based on the specified provider and returns the URL for payment.
+
+### Including:
+
+- Added an endpoint to handle the return of borrowed books, which includes payment processing.
+- Provided serializers for handling provider selection.
+
+### Setting Up Payments with PayPal and Stripe (Test Mode)
 
 This guide will help you configure test payments using PayPal and Stripe in the project.
 
@@ -379,9 +408,10 @@ paypalrestsdk.configure({
 - Use sandbox test accounts from the PayPal Developer Dashboard.
 - Initiate a test payment using the API and verify transactions in the Sandbox Transactions section.
 
-### For logging into PayPal when you go to approval link use these credentials:
-- email -> sb-7crpl38155236@personal.example.com
-- password -> r/3TI90b
+### For logging into PayPal when you go to the approval link, use these credentials:
+
+- Email: sb-7crpl38155236@personal.example.com
+- Password: r/3TI90b
 
 ### 2. Setting Up Stripe (Test Mode)
 To integrate Stripe for test payments:
@@ -418,9 +448,10 @@ STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
 
 stripe.api_key = STRIPE_SECRET_KEY
 ```
-### In order to pay use following card data:
-- Visa	4242424242424242	cvv Any 3 digits	Any future date
-- Mastercard	5555555555554444	cvv Any 3 digits	Any future date
+### Use the following card data for test payments:
+
+- Visa: 4242424242424242, CVV: Any 3 digits, Expiry: Any future date
+- Mastercard: 5555555555554444, CVV: Any 3 digits, Expiry: Any future date
 
 ## Telegram bot
 
