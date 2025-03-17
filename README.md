@@ -346,14 +346,124 @@ To ensure security and control over borrowings, the following access levels are 
 
 Before creating a new borrowing record, the system verifies whether the user has outstanding payments. If there are unpaid transactions via Stripe or PayPal, borrowing is blocked until the payments are settled.
 
-## Payment (Nick)
+## Payments overview
 
-- Status
-- Type
-- Borrowing id -> Borrowing
-- Session url
-- Session id
-- Money to pay
+This project integrates payment processing using PayPal and Stripe. Below is a detailed guide on how to set up and use these payment gateways in test mode.
+
+### Payment Integration:
+
+- Implemented payment processing using Stripe and PayPal.
+- Added utility functions for creating payment records in the database.
+- Integrated choice fields for selecting payment providers.
+- Implemented APIs for returning books with payment handling.
+
+### Utility Functions:
+
+- create_stripe_payment: Creates a Stripe payment instance and returns the payment and checkout session.
+- create_paypal_payment: Creates a PayPal payment instance and returns the payment and approval URL.
+- calculate_payment: Calculates the total amount to be paid and determines the payment type based on the borrowing record.
+- process_payment: Processes the payment based on the specified provider and returns the URL for payment.
+
+### Including:
+
+- Added an endpoint to handle the return of borrowed books, which includes payment processing.
+- Provided serializers for handling provider selection.
+
+## Setting Up Payments with PayPal and Stripe (Test Mode)
+
+This guide will help you configure test payments using PayPal and Stripe in the project.
+
+### 1. Setting Up PayPal (Sandbox Mode)
+
+To integrate PayPal in test mode, follow these steps:
+
+1. **Create a PayPal Developer Account**  
+   - Go to [PayPal Developer Dashboard](https://developer.paypal.com/) and log in.
+   - Navigate to **"Dashboard" → "My Apps & Credentials"**.
+   - Under **Sandbox**, create a new app and get the **Client ID** and **Secret**.
+
+2. **Configure PayPal in Django**  
+   Add the following environment variables in your `.env` file:
+
+```ini
+   PAYPAL_MODE=sandbox  # Use "live" for production
+   PAYPAL_CLIENT_ID=your_paypal_client_id
+   PAYPAL_SECRET=your_paypal_secret
+```
+
+3. **Install PayPal SDK**
+Ensure the SDK is installed in your environment:
+
+```sh
+   pip install paypalrestsdk
+```
+
+4. **Add PayPal Configuration in Django**
+In your Django settings (settings.py):
+
+```python
+import paypalrestsdk
+
+PAYPAL_MODE = os.getenv("PAYPAL_MODE", "sandbox")
+PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
+PAYPAL_SECRET = os.getenv("PAYPAL_SECRET")
+
+paypalrestsdk.configure({
+    "mode": PAYPAL_MODE,
+    "client_id": PAYPAL_CLIENT_ID,
+    "client_secret": PAYPAL_SECRET
+})
+```
+
+5. **Test PayPal Payments**
+
+- Use sandbox test accounts from the PayPal Developer Dashboard.
+- Initiate a test payment using the API and verify transactions in the Sandbox Transactions section.
+
+### For logging into PayPal when you go to the approval link, use these credentials:
+
+- Email: sb-7crpl38155236@personal.example.com
+- Password: r/3TI90b
+
+### 2. Setting Up Stripe (Test Mode)
+To integrate Stripe for test payments:
+
+1. **Create a Stripe Account**
+
+- Go to Stripe Dashboard and log in.
+- Navigate to "Developers" → "API Keys".
+- Copy the Publishable Key and Secret Key.
+2. **Configure Stripe in Django**
+
+Add these environment variables in your .env file:
+
+```ini
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_PUBLIC_KEY=your_stripe_public_key
+```
+
+3. **Install Stripe SDK**
+
+Ensure you have the Stripe package installed:
+
+```sh
+  pip install stripe
+```
+4. **Add Stripe Configuration in Django**
+
+In your Django settings (settings.py):
+```python
+import stripe
+
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
+
+stripe.api_key = STRIPE_SECRET_KEY
+```
+### Use the following card data for test payments:
+
+- Visa: 4242424242424242, CVV: Any 3 digits, Expiry: Any future date
+- Mastercard: 5555555555554444, CVV: Any 3 digits, Expiry: Any future date
 
 ## Books (Oleksandr)
 
@@ -485,102 +595,6 @@ ErrorLog.objects.all()
 Or check error logs in file:
 
 `logs/errors.log`
-
-## Setting Up Payments with PayPal and Stripe (Test Mode)
-
-This guide will help you configure test payments using PayPal and Stripe in the project.
-
-### 1. Setting Up PayPal (Sandbox Mode)
-
-To integrate PayPal in test mode, follow these steps:
-
-1. **Create a PayPal Developer Account**  
-   - Go to [PayPal Developer Dashboard](https://developer.paypal.com/) and log in.
-   - Navigate to **"Dashboard" → "My Apps & Credentials"**.
-   - Under **Sandbox**, create a new app and get the **Client ID** and **Secret**.
-
-2. **Configure PayPal in Django**  
-   Add the following environment variables in your `.env` file:
-
-```ini
-   PAYPAL_MODE=sandbox  # Use "live" for production
-   PAYPAL_CLIENT_ID=your_paypal_client_id
-   PAYPAL_SECRET=your_paypal_secret
-```
-
-3. **Install PayPal SDK**
-Ensure the SDK is installed in your environment:
-
-```sh
-   pip install paypalrestsdk
-```
-
-4. **Add PayPal Configuration in Django**
-In your Django settings (settings.py):
-
-```python
-import paypalrestsdk
-
-PAYPAL_MODE = os.getenv("PAYPAL_MODE", "sandbox")
-PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
-PAYPAL_SECRET = os.getenv("PAYPAL_SECRET")
-
-paypalrestsdk.configure({
-    "mode": PAYPAL_MODE,
-    "client_id": PAYPAL_CLIENT_ID,
-    "client_secret": PAYPAL_SECRET
-})
-```
-
-5. **Test PayPal Payments**
-
-- Use sandbox test accounts from the PayPal Developer Dashboard.
-- Initiate a test payment using the API and verify transactions in the Sandbox Transactions section.
-
-### For logging into PayPal when you go to the approval link, use these credentials:
-
-- Email: sb-7crpl38155236@personal.example.com
-- Password: r/3TI90b
-
-### 2. Setting Up Stripe (Test Mode)
-To integrate Stripe for test payments:
-
-1. **Create a Stripe Account**
-
-- Go to Stripe Dashboard and log in.
-- Navigate to "Developers" → "API Keys".
-- Copy the Publishable Key and Secret Key.
-2. **Configure Stripe in Django**
-
-Add these environment variables in your .env file:
-
-```ini
-STRIPE_SECRET_KEY=your_stripe_secret_key
-STRIPE_PUBLIC_KEY=your_stripe_public_key
-```
-
-3. **Install Stripe SDK**
-
-Ensure you have the Stripe package installed:
-
-```sh
-  pip install stripe
-```
-4. **Add Stripe Configuration in Django**
-
-In your Django settings (settings.py):
-```python
-import stripe
-
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
-
-stripe.api_key = STRIPE_SECRET_KEY
-```
-### Use the following card data for test payments:
-
-- Visa: 4242424242424242, CVV: Any 3 digits, Expiry: Any future date
-- Mastercard: 5555555555554444, CVV: Any 3 digits, Expiry: Any future date
 
 ## Telegram bot
 
