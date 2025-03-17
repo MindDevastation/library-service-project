@@ -327,37 +327,7 @@ Or check error logs in file:
 
 `logs/errors.log`
 
-## Payments & Borrowings overview
-
-This project integrates payment processing using PayPal and Stripe. Below is a detailed guide on how to set up and use these payment gateways in test mode. Additionally, we have implemented features for managing borrowing records, handling payments, and returning borrowed books.
-
-### Borrowing Management:
-
-- Users can borrow books and return them.
-- Borrowing records are managed with statuses: PENDING, RETURNED, OVERDUE.
-- Integrated borrowing validation and status updates.
-- Enhanced logic for calculating payment amounts based on borrowing duration and overdue fines.
-
-### Payment Integration:
-
-- Implemented payment processing using Stripe and PayPal.
-- Added utility functions for creating payment records in the database.
-- Integrated choice fields for selecting payment providers.
-- Implemented APIs for returning books with payment handling.
-
-### Utility Functions:
-
-- create_stripe_payment: Creates a Stripe payment instance and returns the payment and checkout session.
-- create_paypal_payment: Creates a PayPal payment instance and returns the payment and approval URL.
-- calculate_payment: Calculates the total amount to be paid and determines the payment type based on the borrowing record.
-- process_payment: Processes the payment based on the specified provider and returns the URL for payment.
-
-### Including:
-
-- Added an endpoint to handle the return of borrowed books, which includes payment processing.
-- Provided serializers for handling provider selection.
-
-### Setting Up Payments with PayPal and Stripe (Test Mode)
+## Setting Up Payments with PayPal and Stripe (Test Mode)
 
 This guide will help you configure test payments using PayPal and Stripe in the project.
 
