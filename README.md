@@ -822,3 +822,54 @@ If the credentials are incorrect:
 ### Notes
 - Authentication is handled using Django's authenticate function.
 - The email field is used as the username in the custom user model.
+
+## API: CRUD for Books
+
+This project provides full CRUD functionality for managing books.  
+You can use the following API endpoints:
+
+- **Create a Book** (POST `/api/books/`)
+- **Retrieve a Book** (GET `/api/books/{id}/`)
+- **Update a Book** (PUT `/api/books/{id}/`)
+- **Delete a Book** (DELETE `/api/books/{id}/`)
+- **List All Books** (GET `/api/books/`)
+
+Example request to create a book:
+
+```json
+{
+  "title": "The Great Gatsby",
+  "pages": 180,
+  "authors": ["F. Scott Fitzgerald"],
+  "cover": "https://example.com/gatsby.jpg",
+  "inventory": 5,
+  "daily_fee": 1.5,
+  "quantity": 10
+}
+```
+
+## Running the Project
+
+### Start Django Server
+
+Run the following command to start the Django development server:
+
+```sh
+python src/manage.py runserver
+```
+
+The API will be available at `http://127.0.0.1:8000/`.
+
+## Running Celery and Redis
+
+Celery is used for background tasks, and Redis acts as the message broker.
+
+1. **Start Redis** (ensure Redis is installed):
+   ```sh
+   redis-server
+   ```
+2. **Start Celery Worker**:
+   ```sh
+   cd src
+   celery -A library worker --loglevel=info
+   ```
