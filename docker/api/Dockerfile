@@ -1,6 +1,14 @@
 FROM python:3.10-slim
 
-LABEL authors=""
+LABEL authors='{
+  "Pastukhov Oleksii (Team Lead)": "oleksii.pastukhov.py@gmail.com",
+  "Ruslan Yemets": "ruslanyemets@gmail.com",
+  "Arsenii Aristov": "arseniyaristov07@gmail.com",
+  "Mykyta Balabanov": "",
+  "Taras Khomenko": "khomenkotaras1305@gmail.com",
+  "Oleksandr Tsyhanok": "sashasmile1904@gmail.com"
+}'
+
 
 WORKDIR /app
 
@@ -14,8 +22,5 @@ COPY ../.. /app/
 
 EXPOSE 8000
 
-RUN #dos2unix /app/telegram_bot/main.py
 RUN dos2unix /app/scripts/worker_start.sh
 RUN dos2unix /app/scripts/celery_beat_start.sh
-
-#CMD ["python", "src/manage.py", "runserver", "0.0.0.0:8000"]

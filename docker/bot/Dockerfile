@@ -1,5 +1,14 @@
 FROM python:3.10-slim
 
+LABEL authors='{
+  "Pastukhov Oleksii (Team Lead)": "oleksii.pastukhov.py@gmail.com",
+  "Ruslan Yemets": "ruslanyemets@gmail.com",
+  "Arsenii Aristov": "arseniyaristov07@gmail.com",
+  "Mykyta Balabanov": "",
+  "Taras Khomenko": "khomenkotaras1305@gmail.com",
+  "Oleksandr Tsyhanok": "sashasmile1904@gmail.com"
+}'
+
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
