@@ -61,8 +61,8 @@ class Payment(models.Model):
             self.borrow_date = self.borrowing.borrow_date
         super().save(*args, **kwargs)
 
-    def build_absolute_url(self, relative_url):
-        return self.request.build_absolute_uri(relative_url)
+    def build_absolute_url(self, request, relative_url):
+        return request.build_absolute_uri(relative_url)
 
     def __str__(self):
         return f"{self.type} payment of {self.amount} on {self.borrow_date}"
@@ -73,7 +73,7 @@ class StripePayment(Payment):
     session_url = models.CharField(max_length=512, blank=True, null=True)
     objects = models.Manager()
 
-    def create_checkout_session(self):
+    def create_checkout_session(self, request):
         try:
             stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -92,8 +92,14 @@ class StripePayment(Payment):
                     }
                 ],
                 mode="payment",
-                success_url=self.build_absolute_url(reverse("payments:stripe-success")),
-                cancel_url=self.build_absolute_url(reverse("payments:stripe-cancel")),
+                success_url=self.build_absolute_url(
+                    request,
+                    reverse("payments:stripe-success")
+                ) + "?session_id={CHECKOUT_SESSION_ID}",
+                cancel_url=self.build_absolute_url(
+                    request,
+                    reverse("payments:stripe-cancel")
+                ),
             )
             self.session_id = session["id"]
             self.session_url = session["url"]
@@ -109,7 +115,7 @@ class PayPalPayment(Payment):
     approval_url = models.CharField(max_length=512, blank=True, null=True)
     objects = models.Manager()
 
-    def create_order(self):
+    def create_order(self, request):
         try:
             paypalrestsdk.configure(
                 {
@@ -133,8 +139,13 @@ class PayPalPayment(Payment):
                         }
                     ],
                     "redirect_urls": {
-                        "return_url": f"{self.build_absolute_url(reverse('payments:paypal-success'))}",
-                        "cancel_url": f"{self.build_absolute_url(reverse('payments:paypal-cancel'))}",
+                        "return_url": f"{self.build_absolute_url(
+                            request, reverse('payments:paypal-success'))
+                        }",
+                        "cancel_url": f"{self.build_absolute_url(
+                            request,
+                            reverse('payments:paypal-cancel'))
+                        }",
                     },
                 }
             )
