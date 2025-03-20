@@ -96,7 +96,7 @@ class BorrowingViewSet(viewsets.ModelViewSet):
 
             money_to_pay, payment_type = calculate_payment(borrowing)
             go_to_pay = process_payment(
-                borrowing, money_to_pay, currency, payment_type, provider
+                borrowing, money_to_pay, currency, payment_type, provider, request
             )
 
             return Response(

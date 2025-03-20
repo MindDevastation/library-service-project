@@ -2,25 +2,25 @@ from decimal import Decimal
 from payments.models import StripePayment, PayPalPayment
 
 
-def create_stripe_payment(borrowing, amount, currency, payment_type):
+def create_stripe_payment(borrowing, amount, currency, payment_type, request):
     """
     Creates a Stripe payment instance and returns the payment and checkout session.
     """
     payment = StripePayment(
         borrowing=borrowing, amount=amount, currency=currency, type=payment_type
     )
-    session = payment.create_checkout_session()
+    session = payment.create_checkout_session(request)
     return payment, session
 
 
-def create_paypal_payment(borrowing, amount, currency, payment_type):
+def create_paypal_payment(borrowing, amount, currency, payment_type, request):
     """
     Creates a PayPal payment instance and returns the payment and approval URL.
     """
     payment = PayPalPayment(
         borrowing=borrowing, amount=amount, currency=currency, type=payment_type
     )
-    approval_url = payment.create_order()
+    approval_url = payment.create_order(request)
     return payment, approval_url
 
 
@@ -48,18 +48,18 @@ def calculate_payment(borrowing):
     return money_to_pay, payment_type
 
 
-def process_payment(borrowing, money_to_pay, currency, payment_type, provider):
+def process_payment(borrowing, money_to_pay, currency, payment_type, provider, request):
     """
     Processes the payment based on the specified provider and returns the URL for payment.
     """
     if provider == "stripe":
         _, session = create_stripe_payment(
-            borrowing, money_to_pay, currency, payment_type
+            borrowing, money_to_pay, currency, payment_type, request
         )
         return session.url
     elif provider == "paypal":
         _, approval_url = create_paypal_payment(
-            borrowing, money_to_pay, currency, payment_type
+            borrowing, money_to_pay, currency, payment_type, request
         )
         return approval_url
     else:
