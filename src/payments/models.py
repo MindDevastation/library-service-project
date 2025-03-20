@@ -6,6 +6,7 @@ import stripe
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.urls import reverse
 from paypalrestsdk.exceptions import (
     ResourceNotFound,
     UnauthorizedAccess,
@@ -60,6 +61,9 @@ class Payment(models.Model):
             self.borrow_date = self.borrowing.borrow_date
         super().save(*args, **kwargs)
 
+    def build_absolute_url(self, relative_url):
+        return self.request.build_absolute_uri(relative_url)
+
     def __str__(self):
         return f"{self.type} payment of {self.amount} on {self.borrow_date}"
 
@@ -70,8 +74,6 @@ class StripePayment(Payment):
     objects = models.Manager()
 
     def create_checkout_session(self):
-        base_url = "https://d05c-176-111-182-13.ngrok-free.app/api/payments/stripe-"
-
         try:
             stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -90,8 +92,8 @@ class StripePayment(Payment):
                     }
                 ],
                 mode="payment",
-                success_url=base_url + "success/?session_id={CHECKOUT_SESSION_ID}",
-                cancel_url=base_url + "cancel/",
+                success_url=self.build_absolute_url(reverse("payments:stripe-success")),
+                cancel_url=self.build_absolute_url(reverse("payments:stripe-cancel")),
             )
             self.session_id = session["id"]
             self.session_url = session["url"]
@@ -108,7 +110,6 @@ class PayPalPayment(Payment):
     objects = models.Manager()
 
     def create_order(self):
-        base_url = "https://d05c-176-111-182-13.ngrok-free.app/api/payments/paypal-"
         try:
             paypalrestsdk.configure(
                 {
@@ -132,8 +133,8 @@ class PayPalPayment(Payment):
                         }
                     ],
                     "redirect_urls": {
-                        "return_url": f"{base_url}success/",
-                        "cancel_url": f"{base_url}cancel/",
+                        "return_url": f"{self.build_absolute_url(reverse('payments:paypal-success'))}",
+                        "cancel_url": f"{self.build_absolute_url(reverse('payments:paypal-cancel'))}",
                     },
                 }
             )
