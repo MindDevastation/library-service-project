@@ -93,12 +93,11 @@ class StripePayment(Payment):
                 ],
                 mode="payment",
                 success_url=self.build_absolute_url(
-                    request,
-                    reverse("payments:stripe-success")
-                ) + "?session_id={CHECKOUT_SESSION_ID}",
+                    request, reverse("payments:stripe-success")
+                )
+                + "?session_id={CHECKOUT_SESSION_ID}",
                 cancel_url=self.build_absolute_url(
-                    request,
-                    reverse("payments:stripe-cancel")
+                    request, reverse("payments:stripe-cancel")
                 ),
             )
             self.session_id = session["id"]
@@ -139,13 +138,12 @@ class PayPalPayment(Payment):
                         }
                     ],
                     "redirect_urls": {
-                        "return_url": f"{self.build_absolute_url(
-                            request, reverse('payments:paypal-success'))
-                        }",
-                        "cancel_url": f"{self.build_absolute_url(
-                            request,
-                            reverse('payments:paypal-cancel'))
-                        }",
+                        "return_url": self.build_absolute_url(
+                            request, reverse("payments:paypal-success")
+                        ),
+                        "cancel_url": self.build_absolute_url(
+                            request, reverse("payments:paypal-cancel")
+                        ),
                     },
                 }
             )
