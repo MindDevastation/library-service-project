@@ -4,7 +4,7 @@ LABEL authors='{
   "Pastukhov Oleksii (Team Lead)": "oleksii.pastukhov.py@gmail.com",
   "Ruslan Yemets": "ruslanyemets@gmail.com",
   "Arsenii Aristov": "arseniyaristov07@gmail.com",
-  "Mykyta Balabanov": "",
+  "Mykyta Balabanov": "dogoberrr@gmail.com",
   "Taras Khomenko": "khomenkotaras1305@gmail.com",
   "Oleksandr Tsyhanok": "sashasmile1904@gmail.com"
 }'
