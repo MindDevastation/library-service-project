@@ -1,6 +1,7 @@
+import os
+
 import asyncio
 import logging
-import os
 
 from aiogram import Router, types
 from aiogram.filters import CommandStart

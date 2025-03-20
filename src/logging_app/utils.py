@@ -1,5 +1,6 @@
 import logging
 import traceback
+
 from logging_app.models import ErrorLog, ActionLog
 
 logger = logging.getLogger(__name__)

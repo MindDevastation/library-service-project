@@ -1,9 +1,10 @@
 import os
+import requests
 
 from celery import shared_task
 from django.utils.timezone import now
+
 from borrowings.models import Borrowing
-import requests
 
 
 @shared_task

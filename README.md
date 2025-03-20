@@ -533,7 +533,7 @@ Now your project is set up for email notifications using MailTrap! 🎉
 
 **Example:**
 
-![mailtrap.png](mailtrap.png)
+![mailtrap.png](media/mailtrap.png)
 
 If you don't want to create MailTrap account, you can use following credentials in settings.py:
 
@@ -632,49 +632,6 @@ Or check error logs in file:
 
 You can use different approaches in Telegram bots depending on 
 the requirements of the project and the libraries used. Here are the main ones:
-
-### 1. Using `aiogram` (Asynchronous approach)
-- Main idea: aiogram is an asynchronous library for building Telegram bots that uses asyncio for interacting with the Telegram API. It allows handling requests and commands concurrently, improving performance.
-- Best for: Projects where high performance is important, with a large number of users and asynchronous interaction with external services (e.g., databases or APIs).
-- Advantages:
-- - Support for asynchronous operations.
-- - Easy webhook handling.
-- - Fast message and command processing.
-- Example: Suitable for complex bots that need to handle many requests simultaneously and interact efficiently with network resources.
-### 2. Using `python-telegram-bot` (Synchronous approach)
-- Main idea: This is a more traditional synchronous library for building Telegram bots. It's easy to use but less efficient for high-traffic bots.
-- Best for: Smaller projects or when high performance is not critical.
-- Advantages:
-- - Simple to use.
-- - Well-documented and maintained.
-- Disadvantages: Can cause delays when scaling due to its synchronous nature.
-### 3. Using `telebot` (Synchronous approach)
-- Main idea: telebot is another synchronous library that is simple and popular among beginners. It is suitable for creating bots with basic functionality.
-- Best for: Simple bots with few commands and no need for asynchronous interaction with other services.
-- Advantages:
-- - Easy to set up and use.
-- - Ideal for small projects.
-- - Disadvantages: Limited functionality compared to more powerful libraries like aiogram.
-### 4. Webhooks vs. Polling
-- Polling: In polling, the bot periodically checks the Telegram server to receive new messages. This is a simple approach but may cause additional load.
-
-- - Advantages: Easy to set up and suitable for small projects.
-- - Disadvantages: Lower performance compared to webhooks.
-- Webhooks: With webhooks, Telegram server sends notifications to a specified URL when new messages are received. This is a more efficient approach for high-traffic bots.
-
-- - Advantages: Less load on the server, faster response to events.
-- - Disadvantages: Requires setting up a server to handle incoming requests.
-### 5. Microservice Architecture
-- Main idea: Create a Telegram bot as a microservice that interacts with other services via APIs. Each component, such as user authentication, payments, books, etc., could be a separate microservice.
-- Best for: Large projects that require dividing logic into independent components that can be scaled and developed separately.
-- Advantages:
-- - Easier to maintain and extend.
-- - Responsibility is divided among different parts of the system.
-- Disadvantages: Requires more resources for development and maintenance.
-### 6. Using Databases and Caching
-- Main idea: For bots with complex logic and state storage (e.g., user data or progress tracking), databases and caching mechanisms are used for efficient data storage and retrieval.
-- Best for: Projects where data needs to be stored across sessions or when tracking user state.
-- Example: Using Redis or a database (e.g., PostgreSQL) for data caching and user state management.
 
 In this project we are using `aiogram` library
 

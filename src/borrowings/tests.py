@@ -3,7 +3,6 @@ from decimal import Decimal
 
 from django.test import TestCase
 from unittest.mock import patch, MagicMock
-
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.test import APIClient

@@ -1,24 +1,24 @@
-import asyncio
-import logging
 import os
 import sys
+
+import asyncio
+import logging
 
 from aiogram import types
 from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "library.settings")
+
+from aiogram import Bot, Dispatcher, Router
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from telegram_bot.activity import user_last_activity, user_sessions
 from telegram_bot.services.db import disconnect_db
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "library.settings")
-
-from aiogram import Bot, Dispatcher, Router
-
 from config import BOT_TOKEN
 from handlers import start, stop, auth, books, borrowing, me, help
+
 
 logging.basicConfig(level=logging.INFO)
 
